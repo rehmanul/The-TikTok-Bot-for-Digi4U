@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "require": [
     "ts-node/register",
@@ -10,3 +11,17 @@
   "recursive": true,
   "watch-files": ["server/**/*.ts", "test/**/*.ts"]
 }
+=======
+{
+  "require": [
+    "ts-node/register",
+    "test/setup.ts"
+  ],
+  "extension": ["ts"],
+  "spec": "test/**/*.ts",
+  "timeout": 300000,
+  "exit": true,
+  "recursive": true,
+  "watch-files": ["server/**/*.ts", "test/**/*.ts"]
+}
+>>>>>>> 9c7c002549c966c71a60a45c2f851efa2a3c6470
