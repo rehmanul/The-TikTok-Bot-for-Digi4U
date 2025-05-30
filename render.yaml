@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: digi4u-tiktok-bot
+    runtime: node
+    region: oregon
+    branch: main
+    buildCommand: |
+      npm install
+      npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dg4u_tiktok_bot     # Change if your DB is named differently
+
+      - key: SESSION_SECRET
+        value: 505a96a2a2f093ccdbba2b20f23947b2d55a828441134c52bb34932aaedca77e69bcc5d0fa33e9625e0daa34fa92b590b9760bf1ef6535f7bf765168ae18c9d2
+
+      - key: CHROMEDRIVER_PATH
+        value: /usr/bin/google-chrome-stable
+
+    plan: free
+    autoDeploy: true
+
+databases:
+  - name: dg4u_tiktok_bot
+    plan: free
