@@ -34,7 +34,7 @@ export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
   type: text("type").notNull(), // invite_sent, invite_accepted, error, session_start, etc.
   description: text("description").notNull(),
-  metadata: jsonb("metadata"),
+  metadata: jsonb("metadata").default(null),
   sessionId: integer("session_id").references(() => botSessions.id),
   creatorId: integer("creator_id").references(() => creators.id),
   createdAt: timestamp("created_at").defaultNow(),

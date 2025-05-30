@@ -1,8 +1,8 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
+import puppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { storage } from '../storage';
 
-const puppeteerExtra = require('puppeteer-extra');
 puppeteerExtra.use(StealthPlugin());
 
 export class PuppeteerManager {
@@ -208,7 +208,7 @@ export class PuppeteerManager {
       await this.page.keyboard.press('Enter');
 
       // Wait for search results
-      await this.page.waitForTimeout(3000);
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       // Click on the creator profile or invite button
       const inviteSelector = `button:contains("Invite"), button[data-action="invite"]`;
@@ -216,7 +216,7 @@ export class PuppeteerManager {
       await this.page.click(inviteSelector);
 
       // Wait for confirmation or success message
-      await this.page.waitForTimeout(2000);
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       await storage.logActivity({
         type: 'invite_sent',
@@ -237,7 +237,7 @@ export class PuppeteerManager {
 
   async humanDelay(min: number = 2000, max: number = 5000): Promise<void> {
     const delay = Math.random() * (max - min) + min;
-    await this.page?.waitForTimeout(delay);
+    await new Promise(resolve => setTimeout(resolve, delay));
   }
 
   async close(): Promise<void> {

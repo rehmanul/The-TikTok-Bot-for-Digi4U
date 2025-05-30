@@ -113,8 +113,14 @@ export class MemStorage implements IStorage {
   async createBotSession(insertSession: InsertBotSession): Promise<BotSession> {
     const id = this.currentSessionId++;
     const session: BotSession = {
-      ...insertSession,
       id,
+      status: insertSession.status || 'idle',
+      startTime: insertSession.startTime || null,
+      endTime: insertSession.endTime || null,
+      invitesSent: insertSession.invitesSent || 0,
+      successfulInvites: insertSession.successfulInvites || 0,
+      errorCount: insertSession.errorCount || 0,
+      settings: insertSession.settings || null,
       createdAt: new Date(),
     };
     this.botSessions.set(id, session);
@@ -146,8 +152,12 @@ export class MemStorage implements IStorage {
   async createCreator(insertCreator: InsertCreator): Promise<Creator> {
     const id = this.currentCreatorId++;
     const creator: Creator = {
-      ...insertCreator,
       id,
+      username: insertCreator.username,
+      followers: insertCreator.followers || null,
+      category: insertCreator.category || null,
+      lastInvited: insertCreator.lastInvited || null,
+      inviteStatus: insertCreator.inviteStatus || null,
       createdAt: new Date(),
     };
     this.creators.set(id, creator);
@@ -202,8 +212,12 @@ export class MemStorage implements IStorage {
   async logActivity(insertActivity: InsertActivity): Promise<Activity> {
     const id = this.currentActivityId++;
     const activity: Activity = {
-      ...insertActivity,
       id,
+      type: insertActivity.type,
+      description: insertActivity.description,
+      metadata: insertActivity.metadata || null,
+      sessionId: insertActivity.sessionId || null,
+      creatorId: insertActivity.creatorId || null,
       createdAt: new Date(),
     };
     this.activities.set(id, activity);
