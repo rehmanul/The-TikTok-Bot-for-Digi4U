@@ -260,6 +260,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check login status endpoint
+  app.post("/api/bot/check-login", async (req, res) => {
+    try {
+      // Initialize browser and check if we can access TikTok Seller Center
+      const puppeteerManager = sessionManager['puppeteerManager'] || new (await import('./bot/puppeteer-manager')).PuppeteerManager();
+      
+      await puppeteerManager.initialize();
+      
+      // Navigate to seller center to check if logged in
+      await puppeteerManager['page']?.goto('https://seller-uk.tiktok.com/compass', { 
+        waitUntil: 'networkidle2',
+        timeout: 10000 
+      });
+      
+      const currentUrl = puppeteerManager['page']?.url() || '';
+      const isLoggedIn = !currentUrl.includes('/login') && !currentUrl.includes('/account/login');
+      
+      if (isLoggedIn) {
+        await activityLogger.logUserAction("TikTok login verified successfully");
+      }
+      
+      res.json({ 
+        success: true, 
+        isLoggedIn,
+        currentUrl 
+      });
+      
+    } catch (error) {
+      await activityLogger.logError(
+        error instanceof Error ? error : new Error(String(error)),
+        "Failed to check login status"
+      );
+      res.json({ 
+        success: false, 
+        isLoggedIn: false,
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Health check endpoint
   app.get("/api/health", async (req, res) => {
     try {

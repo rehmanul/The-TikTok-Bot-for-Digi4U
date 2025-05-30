@@ -24,8 +24,8 @@ export function Sidebar() {
   const { data: botStatus } = useBotStatus();
 
   const navigationItems = [
-    { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/configuration', label: 'Configuration', icon: Settings },
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/settings', label: 'Bot Settings', icon: Settings },
     { path: '/creators', label: 'Creators', icon: Users },
     { path: '/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/logs', label: 'Activity Logs', icon: ScrollText },
@@ -34,7 +34,7 @@ export function Sidebar() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'running': return 'bg-green-500';
-      case 'paused': return 'bg-yellow-500';
+      case 'paused': return 'bg-orange-500';
       case 'stopped': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
