@@ -27,8 +27,19 @@ export class PuppeteerManager {
     ];
 
     this.browser = await puppeteerExtra.launch({
-      headless: process.env.PUPPETEER_HEADLESS !== 'false',
-      args: puppeteerArgs,
+      headless: true, // Force headless for Replit
+      executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor'
+      ],
       defaultViewport: {
         width: parseInt(process.env.PUPPETEER_VIEWPORT_WIDTH || '1920'),
         height: parseInt(process.env.PUPPETEER_VIEWPORT_HEIGHT || '1080'),
@@ -114,18 +125,19 @@ export class PuppeteerManager {
     }
 
     try {
-      await this.page.goto('https://seller-us.tiktok.com/compass/affiliate', {
+      // Navigate to TikTok affiliate creator connection page for UK region
+      await this.page.goto('https://affiliate.tiktok.com/connection/creator?shop_region=GB', {
         waitUntil: 'networkidle2',
         timeout: 30000
       });
 
-      await this.page.waitForSelector('[data-testid="affiliate-center"], .affiliate-management', { 
+      await this.page.waitForSelector('.creator-list, [data-testid="creator-list"], .affiliate-page', { 
         timeout: 15000 
       });
 
       await storage.logActivity({
         type: 'navigation',
-        description: 'Navigated to TikTok Affiliate Center',
+        description: 'Navigated to TikTok Affiliate Creator Connection',
         metadata: { url: this.page.url() },
       });
 
@@ -137,6 +149,77 @@ export class PuppeteerManager {
         metadata: { error: String(error) },
       });
       return false;
+    }
+  }
+
+  async createCollaborationLink(productName: string, targetInvites: number = 300): Promise<string[]> {
+    if (!this.page) throw new Error('Browser not initialized');
+    
+    const invitationLinks: string[] = [];
+    const linksNeeded = Math.ceil(targetInvites / 50); // 50 creators per link
+    
+    try {
+      await this.page.goto('https://affiliate.tiktok.com/connection/collaboration', {
+        waitUntil: 'networkidle2',
+        timeout: 30000
+      });
+
+      for (let i = 1; i <= linksNeeded; i++) {
+        const collaborationName = `${productName}-${i}`;
+        
+        // Click create collaboration button
+        await this.page.waitForSelector('button[data-testid="create-collaboration"], .create-collaboration-btn', { timeout: 10000 });
+        await this.page.click('button[data-testid="create-collaboration"], .create-collaboration-btn');
+        
+        // Fill collaboration details
+        await this.page.waitForSelector('input[placeholder*="name"], input[name="collaboration_name"]', { timeout: 10000 });
+        await this.page.type('input[placeholder*="name"], input[name="collaboration_name"]', collaborationName);
+        
+        // Set 10% commission rate
+        const commissionInput = await this.page.$('input[placeholder*="commission"], input[name="commission_rate"]');
+        if (commissionInput) {
+          await commissionInput.click({ clickCount: 3 });
+          await commissionInput.type('10');
+        }
+        
+        // Enable manual review
+        const manualReviewCheckbox = await this.page.$('input[type="checkbox"][data-testid*="manual"], input[name*="manual_review"]');
+        if (manualReviewCheckbox) {
+          await manualReviewCheckbox.click();
+        }
+        
+        // Set validation period to 1 month
+        const validitySelect = await this.page.$('select[data-testid*="validity"], select[name*="validity"]');
+        if (validitySelect) {
+          await this.page.select('select[data-testid*="validity"], select[name*="validity"]', '30');
+        }
+        
+        // Save collaboration
+        await this.page.click('button[data-testid="save"], button[type="submit"]');
+        await this.humanDelay(2000, 4000);
+        
+        // Get the generated link
+        const linkElement = await this.page.$('.collaboration-link, [data-testid="collaboration-link"]');
+        if (linkElement) {
+          const link = await linkElement.textContent();
+          if (link) invitationLinks.push(link.trim());
+        }
+        
+        await storage.logActivity({
+          type: 'collaboration_created',
+          description: `Created collaboration link: ${collaborationName}`,
+          metadata: { name: collaborationName, commission: 10 },
+        });
+      }
+      
+      return invitationLinks;
+    } catch (error) {
+      await storage.logActivity({
+        type: 'collaboration_error',
+        description: `Failed to create collaboration links: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        metadata: { error: String(error) },
+      });
+      return [];
     }
   }
 
