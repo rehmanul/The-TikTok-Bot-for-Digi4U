@@ -11,7 +11,9 @@ export class CreatorFilter {
         const followers = this.parseFollowerCount(creatorData.followers);
         
         // Check if within follower range
-        if (followers < config.minFollowers || followers > config.maxFollowers) {
+        const min = config.minFollowers ?? 0;
+        const max = config.maxFollowers ?? Number.MAX_SAFE_INTEGER;
+        if (followers < min || followers > max) {
           continue;
         }
 

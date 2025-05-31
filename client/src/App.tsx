@@ -25,9 +25,7 @@ function Router() {
   const { data: botStatus } = useBotStatus();
   
   // Check if user is authenticated (has active TikTok session)
-  const isAuthenticated = botStatus?.session?.puppeteer?.isLoggedIn || 
-                          botStatus?.session?.isLoggedIn || 
-                          false;
+  const isAuthenticated = botStatus?.session?.puppeteer?.isLoggedIn || false;
   
   // Redirect to login if not authenticated and not already on login page
   if (!isAuthenticated && location !== '/' && !location.startsWith('/login')) {

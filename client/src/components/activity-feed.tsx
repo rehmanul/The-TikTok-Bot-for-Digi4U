@@ -139,7 +139,7 @@ export function ActivityFeed() {
         <ScrollArea className="h-80">
           {activities && activities.length > 0 ? (
             <div className="space-y-4">
-              {activities.map((activity: any) => {
+              {activities.map((activity) => {
                 const Icon = getActivityIcon(activity.type);
                 const badge = getActivityBadge(activity.type);
                 
@@ -162,22 +162,22 @@ export function ActivityFeed() {
                         </Badge>
                       </div>
                       
-                      {activity.metadata && (
+                      {activity.metadata ? (
                         <div className="text-xs text-muted-foreground mb-1">
-                          {activity.metadata.username && (
-                            <span>@{activity.metadata.username}</span>
+                          {(activity.metadata as any).username && (
+                            <span>@{(activity.metadata as any).username}</span>
                           )}
-                          {activity.metadata.followers && (
-                            <span> • {activity.metadata.followers} followers</span>
+                          {(activity.metadata as any).followers && (
+                            <span> • {(activity.metadata as any).followers} followers</span>
                           )}
-                          {activity.metadata.category && (
-                            <span> • {activity.metadata.category}</span>
+                          {(activity.metadata as any).category && (
+                            <span> • {(activity.metadata as any).category}</span>
                           )}
                         </div>
-                      )}
+                      ) : null}
                       
                       <p className="text-xs text-muted-foreground">
-                        {formatRelativeTime(activity.createdAt)}
+                        {formatRelativeTime(activity.createdAt ?? new Date())}
                       </p>
                     </div>
                   </div>
