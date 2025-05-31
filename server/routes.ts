@@ -278,69 +278,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error('Failed to initialize browser page');
       }
 
-      // Set shorter timeouts for login verification
-      page.setDefaultTimeout(10000);
-      page.setDefaultNavigationTimeout(12000);
+      // Set optimized timeouts for login verification
+      page.setDefaultTimeout(15000);
+      page.setDefaultNavigationTimeout(20000);
       
-      // Try multiple URLs to verify login status
+      // Try multiple URLs to verify login status, starting with most reliable
       const urlsToCheck = [
-        'https://seller-uk.tiktok.com/',
         'https://seller-uk.tiktok.com/compass',
-        'https://seller-uk.tiktok.com/university'
+        'https://seller-uk.tiktok.com/',
+        'https://seller-uk.tiktok.com/university',
+        'https://seller-uk.tiktok.com/dashboard'
       ];
 
       let isLoggedIn = false;
       let finalUrl = '';
       let verificationMethod = 'none';
+      let lastError = null;
 
-      for (const url of urlsToCheck) {
+      for (let i = 0; i < urlsToCheck.length; i++) {
+        const url = urlsToCheck[i];
+        
         try {
-          console.log(`Checking login status at: ${url}`);
+          console.log(`Attempt ${i + 1}: Checking login status at: ${url}`);
           
           await page.goto(url, { 
             waitUntil: 'domcontentloaded',
-            timeout: 12000 
+            timeout: 20000 
           });
           
-          // Wait for potential redirects
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          // Wait for page to fully load and potential redirects
+          await new Promise(resolve => setTimeout(resolve, 4000));
           
           finalUrl = page.url();
           console.log(`Final URL after navigation: ${finalUrl}`);
           
-          // Check if we're on a login page
+          // Enhanced login page detection
           const isOnLoginPage = finalUrl.includes('/login') || 
                                finalUrl.includes('/account/login') ||
                                finalUrl.includes('accounts.tiktok.com') ||
-                               finalUrl.includes('auth.');
+                               finalUrl.includes('auth.') ||
+                               finalUrl.includes('/signin') ||
+                               finalUrl.includes('/authenticate');
           
           if (!isOnLoginPage) {
-            // Try to find seller-specific elements that indicate successful login
+            // Multi-layer verification approach
+            
+            // 1. Check for seller-specific elements
             try {
               const hasSellerElements = await Promise.race([
                 page.evaluate(() => {
-                  // Look for seller center specific elements
                   const sellerIndicators = [
-                    '.seller-layout',
-                    '.seller-header', 
-                    '.seller-nav',
-                    '.seller-sidebar',
-                    '[data-testid*="seller"]',
-                    '.compass-layout',
-                    '.university-layout',
-                    '.navigation-bar',
-                    '.main-content',
-                    '.sidebar-menu'
+                    '.seller-layout', '.seller-header', '.seller-nav', '.seller-sidebar',
+                    '[data-testid*="seller"]', '.compass-layout', '.university-layout',
+                    '.navigation-bar', '.main-content', '.sidebar-menu', '.seller-center',
+                    '.dashboard-layout', '.nav-container', '.header-container'
                   ];
                   
                   const foundElements = sellerIndicators.filter(selector => 
                     document.querySelector(selector) !== null
                   );
                   
-                  console.log('Found seller elements:', foundElements);
                   return foundElements.length > 0;
                 }),
-                new Promise(resolve => setTimeout(() => resolve(false), 4000))
+                new Promise(resolve => setTimeout(() => resolve(false), 5000))
               ]);
 
               if (hasSellerElements) {
@@ -352,41 +352,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log('Element evaluation failed:', evalError);
             }
 
-            // Additional check: try to access user info from page context
+            // 2. Check for authentication tokens/cookies
             try {
-              const hasUserData = await Promise.race([
+              const hasAuthData = await Promise.race([
                 page.evaluate(() => {
-                  // Check for user data in common places
-                  return !!(
-                    window.localStorage.getItem('user') ||
-                    window.sessionStorage.getItem('token') ||
-                    document.cookie.includes('session') ||
-                    document.cookie.includes('auth') ||
-                    window.__INITIAL_STATE__?.user ||
-                    window.userData
+                  const cookieString = document.cookie;
+                  const hasAuthCookies = cookieString.includes('sessionid') ||
+                                       cookieString.includes('csrf') ||
+                                       cookieString.includes('auth') ||
+                                       cookieString.includes('token') ||
+                                       cookieString.includes('tiktok_');
+                  
+                  const hasStorageAuth = !!(
+                    localStorage.getItem('user') ||
+                    localStorage.getItem('token') ||
+                    sessionStorage.getItem('auth') ||
+                    localStorage.getItem('tiktok_auth')
                   );
+                  
+                  return hasAuthCookies || hasStorageAuth;
                 }),
                 new Promise(resolve => setTimeout(() => resolve(false), 3000))
               ]);
 
-              if (hasUserData) {
+              if (hasAuthData) {
                 isLoggedIn = true;
-                verificationMethod = 'user_data_detection';
+                verificationMethod = 'auth_data_detection';
                 break;
               }
-            } catch (userDataError) {
-              console.log('User data check failed:', userDataError);
+            } catch (authError) {
+              console.log('Auth data check failed:', authError);
             }
 
-            // If we made it here and we're not on login page, assume logged in
-            if (!isOnLoginPage) {
+            // 3. Check page title and content for seller center indicators
+            try {
+              const hasSellerContent = await Promise.race([
+                page.evaluate(() => {
+                  const title = document.title.toLowerCase();
+                  const hasSellerTitle = title.includes('seller') || 
+                                       title.includes('center') || 
+                                       title.includes('compass') ||
+                                       title.includes('dashboard');
+                  
+                  const bodyText = document.body.innerText.toLowerCase();
+                  const hasSellerText = bodyText.includes('seller center') ||
+                                      bodyText.includes('dashboard') ||
+                                      bodyText.includes('analytics') ||
+                                      bodyText.includes('products');
+                  
+                  return hasSellerTitle || hasSellerText;
+                }),
+                new Promise(resolve => setTimeout(() => resolve(false), 3000))
+              ]);
+
+              if (hasSellerContent) {
+                isLoggedIn = true;
+                verificationMethod = 'content_analysis';
+                break;
+              }
+            } catch (contentError) {
+              console.log('Content analysis failed:', contentError);
+            }
+
+            // 4. Final check: if we're not on login page and URL looks right, assume logged in
+            if (finalUrl.includes('seller-uk.tiktok.com') && !isOnLoginPage) {
               isLoggedIn = true;
               verificationMethod = 'url_analysis';
               break;
             }
           }
+          
         } catch (navigationError) {
-          console.log(`Navigation to ${url} failed:`, navigationError);
+          lastError = navigationError;
+          console.log(`Navigation to ${url} failed:`, navigationError.message);
+          
+          // If it's the last URL and all failed, continue to error handling
+          if (i === urlsToCheck.length - 1) {
+            throw navigationError;
+          }
           continue;
         }
       }
@@ -399,24 +442,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           method: verificationMethod,
           elapsedTime 
         });
+        
+        res.json({ 
+          success: true, 
+          isLoggedIn: true,
+          currentUrl: finalUrl,
+          verificationMethod,
+          elapsedTime,
+          message: `Login verified successfully using ${verificationMethod}`
+        });
       } else {
-        await activityLogger.logUserAction("TikTok login verification failed - not logged in", undefined, { 
+        await activityLogger.logUserAction("TikTok login verification failed", undefined, { 
           url: finalUrl, 
           method: verificationMethod,
           elapsedTime 
         });
+        
+        res.json({ 
+          success: true, 
+          isLoggedIn: false,
+          currentUrl: finalUrl,
+          verificationMethod,
+          elapsedTime,
+          message: 'Not logged in. Please complete the login process in TikTok Seller Center.'
+        });
       }
-      
-      res.json({ 
-        success: true, 
-        isLoggedIn,
-        currentUrl: finalUrl,
-        verificationMethod,
-        elapsedTime,
-        message: isLoggedIn ? 
-          `Login verified successfully using ${verificationMethod}` : 
-          'Please complete the login process in TikTok Seller Center and try again'
-      });
       
     } catch (error) {
       const elapsedTime = Date.now() - startTime;
@@ -433,7 +483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isLoggedIn: false,
         error: error instanceof Error ? error.message : "Unknown error",
         elapsedTime,
-        message: "Unable to verify login status. Please ensure you completed the login process and try again."
+        message: "Unable to verify login status. Please try again or contact support if the issue persists."
       });
     } finally {
       // Always clean up the puppeteer instance
