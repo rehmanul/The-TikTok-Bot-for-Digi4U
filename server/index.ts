@@ -43,8 +43,17 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
+    console.error('Express error:', err);
     res.status(status).json({ message });
-    throw err;
+  });
+
+  // Global error handlers to prevent crashes
+  process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   });
 
   // importantly only setup vite in development and after
