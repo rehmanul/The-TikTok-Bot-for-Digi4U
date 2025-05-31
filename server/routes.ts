@@ -424,7 +424,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
         } catch (navigationError) {
           lastError = navigationError;
-          console.log(`Navigation to ${url} failed:`, navigationError.message);
+          const msg = (navigationError as Error).message;
+          console.log(`Navigation to ${url} failed:`, msg);
           
           // If it's the last URL and all failed, continue to error handling
           if (i === urlsToCheck.length - 1) {

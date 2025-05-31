@@ -160,7 +160,7 @@ export class SessionManager {
           a.createdAt >= today
         ).length;
 
-        if (todayInvites >= config.dailyLimit) {
+        if (config.dailyLimit != null && todayInvites >= config.dailyLimit) {
           await this.stopSession('Daily limit reached');
           break;
         }
