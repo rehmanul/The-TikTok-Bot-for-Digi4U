@@ -104,7 +104,7 @@ export function BotControl() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'running': return 'bg-green-500';
-      case 'paused': return 'bg-yellow-500';
+      case 'paused': return 'bg-tiktok-secondary';
       case 'stopped': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
