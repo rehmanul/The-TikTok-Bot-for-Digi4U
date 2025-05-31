@@ -1,13 +1,11 @@
-console.log("[*] Codex runner starting...");
+import runBot from "../src/bot/index.ts"; // adjust the path
 
 (async () => {
   try {
-    // Simulate bot test
-    console.log("✅ TikTok bot logic placeholder...");
-    await new Promise((res) => setTimeout(res, 1000));
-    console.log("✅ Codex runner finished.");
+    await runBot(); // this should run your full invitation logic
+    console.log("✅ Bot execution finished.");
   } catch (err) {
-    console.error("❌ Error in runner:", err);
+    console.error("❌ Bot error:", err);
     process.exit(1);
   }
 })();
