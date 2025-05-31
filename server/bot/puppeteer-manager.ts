@@ -71,7 +71,8 @@ export class PuppeteerManager {
     }
 
     try {
-      await this.page.goto('https://seller-us.tiktok.com/account/login', { 
+      const sellerBaseUrl = process.env.TIKTOK_SELLER_URL || 'https://seller-us.tiktok.com';
+      await this.page.goto(`${sellerBaseUrl}/account/login`, {
         waitUntil: 'networkidle2',
         timeout: 30000 
       });
@@ -125,8 +126,9 @@ export class PuppeteerManager {
     }
 
     try {
-      // Navigate to TikTok affiliate creator connection page for UK region
-      await this.page.goto('https://affiliate.tiktok.com/connection/creator?shop_region=GB', {
+      // Navigate to TikTok affiliate creator connection page
+      const region = process.env.TIKTOK_SHOP_REGION || 'GB';
+      await this.page.goto(`https://affiliate.tiktok.com/connection/creator?shop_region=${region}`, {
         waitUntil: 'networkidle2',
         timeout: 30000
       });
@@ -159,7 +161,8 @@ export class PuppeteerManager {
     const linksNeeded = Math.ceil(targetInvites / 50); // 50 creators per link
     
     try {
-      await this.page.goto('https://affiliate.tiktok.com/connection/collaboration', {
+      const region = process.env.TIKTOK_SHOP_REGION || 'GB';
+      await this.page.goto(`https://affiliate.tiktok.com/connection/collaboration?shop_region=${region}`, {
         waitUntil: 'networkidle2',
         timeout: 30000
       });
@@ -230,7 +233,8 @@ export class PuppeteerManager {
 
     try {
       // Navigate to creator discovery section
-      await this.page.goto('https://seller-us.tiktok.com/compass/affiliate/creators', {
+      const sellerBaseUrl = process.env.TIKTOK_SELLER_URL || 'https://seller-us.tiktok.com';
+      await this.page.goto(`${sellerBaseUrl}/compass/affiliate/creators`, {
         waitUntil: 'networkidle2',
         timeout: 30000
       });
