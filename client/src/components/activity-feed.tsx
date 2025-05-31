@@ -81,7 +81,7 @@ export function ActivityFeed() {
       case 'invite_rejected': return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-950';
       case 'creator_discovery': return 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-950';
       case 'session_start': return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-950';
-      case 'session_pause': return 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-950';
+      case 'session_pause': return 'text-tiktok-secondary bg-tiktok-secondary/10 dark:text-tiktok-secondary dark:bg-tiktok-secondary/20';
       case 'session_stop': return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-950';
       case 'error': return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-950';
       case 'login_success': return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-950';

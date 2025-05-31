@@ -5,19 +5,23 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useBotStatus } from '@/hooks/use-bot-status';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/components/theme-provider';
 import { 
   Rocket, 
   LogIn, 
   CheckCircle, 
-  AlertCircle, 
+  AlertCircle,
   Loader2,
-  ExternalLink 
+  ExternalLink,
+  Moon,
+  Sun
 } from 'lucide-react';
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { data: botStatus } = useBotStatus();
+  const { theme, setTheme } = useTheme();
   const [isConnecting, setIsConnecting] = useState(false);
   const [loginStatus, setLoginStatus] = useState<'idle' | 'connecting' | 'manual' | 'checking' | 'success'>('idle');
 
@@ -27,8 +31,9 @@ export default function Login() {
     
     try {
       // Open TikTok Seller UK login in new window
+      // Use the same domain as the server check to ensure cookies are shared
       const loginWindow = window.open(
-        'https://seller-uk-accounts.tiktok.com/account/login',
+        'https://seller-uk.tiktok.com/account/login',
         'tiktok-login',
         'width=800,height=600,scrollbars=yes,resizable=yes'
       );
@@ -144,7 +149,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-tiktok-primary/10 to-tiktok-secondary/10 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-tiktok-primary/10 to-tiktok-secondary/10 flex items-center justify-center p-6 relative">
+      <div className="absolute top-4 right-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+        >
+          {theme === 'light' ? (
+            <Moon className="w-4 h-4" />
+          ) : (
+            <Sun className="w-4 h-4" />
+          )}
+        </Button>
+      </div>
       <div className="w-full max-w-md space-y-8">
         {/* Logo and Title */}
         <div className="text-center">
@@ -208,10 +226,10 @@ export default function Login() {
             </div>
 
             {/* Warning */}
-            <div className="flex items-start space-x-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-              <div className="text-xs text-yellow-700 dark:text-yellow-200">
-                <strong>Important:</strong> Only use with your own TikTok Seller account. 
+            <div className="flex items-start space-x-2 p-3 bg-tiktok-primary/10 dark:bg-tiktok-primary/20 border border-tiktok-primary rounded-lg">
+              <AlertCircle className="w-4 h-4 text-tiktok-primary mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-tiktok-primary">
+                <strong>Important:</strong> Only use with your own TikTok Seller account.
                 Ensure you comply with TikTok's terms of service.
               </div>
             </div>

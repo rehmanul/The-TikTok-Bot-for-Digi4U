@@ -187,7 +187,7 @@
   }
 
   .badge-paused {
-    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+    @apply bg-tiktok-secondary/10 text-tiktok-secondary dark:bg-tiktok-secondary/20 dark:text-tiktok-secondary;
   }
 
   .badge-stopped {
