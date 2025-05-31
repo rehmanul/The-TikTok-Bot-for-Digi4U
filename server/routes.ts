@@ -269,7 +269,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await puppeteerManager.initialize();
       
       // Navigate to seller center to check if logged in
-      await puppeteerManager['page']?.goto('https://seller-uk.tiktok.com/compass', { 
+      const sellerBaseUrl = process.env.TIKTOK_SELLER_URL || 'https://seller-us.tiktok.com';
+      await puppeteerManager['page']?.goto(`${sellerBaseUrl}/compass`, {
         waitUntil: 'networkidle2',
         timeout: 10000 
       });
