@@ -11,51 +11,69 @@ export class PuppeteerManager {
   private isLoggedIn = false;
 
   async initialize(): Promise<void> {
-    if (this.browser) {
-      await this.close();
-    }
+    try {
+      if (this.browser) {
+        await this.close();
+      }
 
-    const puppeteerArgs = process.env.PUPPETEER_ARGS?.split(',') || [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu'
-    ];
-
-    this.browser = await puppeteerExtra.launch({
-      headless: true, // Force headless for Replit
-      executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
-      args: [
+      const puppeteerArgs = process.env.PUPPETEER_ARGS?.split(',') || [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
         '--no-zygote',
-        '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor'
-      ],
-      defaultViewport: {
-        width: parseInt(process.env.PUPPETEER_VIEWPORT_WIDTH || '1920'),
-        height: parseInt(process.env.PUPPETEER_VIEWPORT_HEIGHT || '1080'),
-      },
-    });
+        '--single-process',
+        '--disable-gpu'
+      ];
 
-    this.page = await this.browser.newPage();
-    await this.page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    );
+      this.browser = await puppeteerExtra.launch({
+        headless: true, // Force headless for Replit
+        executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding'
+        ],
+        defaultViewport: {
+          width: parseInt(process.env.PUPPETEER_VIEWPORT_WIDTH || '1920'),
+          height: parseInt(process.env.PUPPETEER_VIEWPORT_HEIGHT || '1080'),
+        },
+        timeout: 30000,
+      });
 
-    await storage.logActivity({
-      type: 'system',
-      description: 'Browser initialized successfully',
-      metadata: { headless: process.env.PUPPETEER_HEADLESS !== 'false' },
-    });
+      this.page = await this.browser.newPage();
+      
+      // Set timeouts
+      this.page.setDefaultTimeout(15000);
+      this.page.setDefaultNavigationTimeout(20000);
+      
+      await this.page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      );
+
+      await storage.logActivity({
+        type: 'system',
+        description: 'Browser initialized successfully',
+        metadata: { headless: process.env.PUPPETEER_HEADLESS !== 'false' },
+      });
+    } catch (error) {
+      await storage.logActivity({
+        type: 'system_error',
+        description: `Browser initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        metadata: { error: String(error) },
+      });
+      throw error;
+    }
   }
 
   async login(): Promise<boolean> {
@@ -71,8 +89,7 @@ export class PuppeteerManager {
     }
 
     try {
-      const sellerBaseUrl = process.env.TIKTOK_SELLER_URL || 'https://seller-us.tiktok.com';
-      await this.page.goto(`${sellerBaseUrl}/account/login`, {
+      await this.page.goto('https://seller-us.tiktok.com/account/login', { 
         waitUntil: 'networkidle2',
         timeout: 30000 
       });
@@ -126,9 +143,8 @@ export class PuppeteerManager {
     }
 
     try {
-      // Navigate to TikTok affiliate creator connection page
-      const region = process.env.TIKTOK_SHOP_REGION || 'GB';
-      await this.page.goto(`https://affiliate.tiktok.com/connection/creator?shop_region=${region}`, {
+      // Navigate to TikTok affiliate creator connection page for UK region
+      await this.page.goto('https://affiliate.tiktok.com/connection/creator?shop_region=GB', {
         waitUntil: 'networkidle2',
         timeout: 30000
       });
@@ -156,65 +172,64 @@ export class PuppeteerManager {
 
   async createCollaborationLink(productName: string, targetInvites: number = 300): Promise<string[]> {
     if (!this.page) throw new Error('Browser not initialized');
-    
+
     const invitationLinks: string[] = [];
     const linksNeeded = Math.ceil(targetInvites / 50); // 50 creators per link
-    
+
     try {
-      const region = process.env.TIKTOK_SHOP_REGION || 'GB';
-      await this.page.goto(`https://affiliate.tiktok.com/connection/collaboration?shop_region=${region}`, {
+      await this.page.goto('https://affiliate.tiktok.com/connection/collaboration', {
         waitUntil: 'networkidle2',
         timeout: 30000
       });
 
       for (let i = 1; i <= linksNeeded; i++) {
         const collaborationName = `${productName}-${i}`;
-        
+
         // Click create collaboration button
         await this.page.waitForSelector('button[data-testid="create-collaboration"], .create-collaboration-btn', { timeout: 10000 });
         await this.page.click('button[data-testid="create-collaboration"], .create-collaboration-btn');
-        
+
         // Fill collaboration details
         await this.page.waitForSelector('input[placeholder*="name"], input[name="collaboration_name"]', { timeout: 10000 });
         await this.page.type('input[placeholder*="name"], input[name="collaboration_name"]', collaborationName);
-        
+
         // Set 10% commission rate
         const commissionInput = await this.page.$('input[placeholder*="commission"], input[name="commission_rate"]');
         if (commissionInput) {
           await commissionInput.click({ clickCount: 3 });
           await commissionInput.type('10');
         }
-        
+
         // Enable manual review
         const manualReviewCheckbox = await this.page.$('input[type="checkbox"][data-testid*="manual"], input[name*="manual_review"]');
         if (manualReviewCheckbox) {
           await manualReviewCheckbox.click();
         }
-        
+
         // Set validation period to 1 month
         const validitySelect = await this.page.$('select[data-testid*="validity"], select[name*="validity"]');
         if (validitySelect) {
           await this.page.select('select[data-testid*="validity"], select[name*="validity"]', '30');
         }
-        
+
         // Save collaboration
         await this.page.click('button[data-testid="save"], button[type="submit"]');
         await this.humanDelay(2000, 4000);
-        
+
         // Get the generated link
         const linkElement = await this.page.$('.collaboration-link, [data-testid="collaboration-link"]');
         if (linkElement) {
           const link = await linkElement.textContent();
           if (link) invitationLinks.push(link.trim());
         }
-        
+
         await storage.logActivity({
           type: 'collaboration_created',
           description: `Created collaboration link: ${collaborationName}`,
           metadata: { name: collaborationName, commission: 10 },
         });
       }
-      
+
       return invitationLinks;
     } catch (error) {
       await storage.logActivity({
@@ -233,8 +248,7 @@ export class PuppeteerManager {
 
     try {
       // Navigate to creator discovery section
-      const sellerBaseUrl = process.env.TIKTOK_SELLER_URL || 'https://seller-us.tiktok.com';
-      await this.page.goto(`${sellerBaseUrl}/compass/affiliate/creators`, {
+      await this.page.goto('https://seller-us.tiktok.com/compass/affiliate/creators', {
         waitUntil: 'networkidle2',
         timeout: 30000
       });
@@ -328,10 +342,17 @@ export class PuppeteerManager {
   }
 
   async close(): Promise<void> {
-    if (this.browser) {
-      await this.browser.close();
-      this.browser = null;
-      this.page = null;
+    try {
+      if (this.page) {
+        await this.page.close().catch(() => {});
+        this.page = null;
+      }
+      
+      if (this.browser) {
+        await this.browser.close().catch(() => {});
+        this.browser = null;
+      }
+      
       this.isLoggedIn = false;
 
       await storage.logActivity({
@@ -339,6 +360,12 @@ export class PuppeteerManager {
         description: 'Browser closed',
         metadata: {},
       });
+    } catch (error) {
+      console.error('Error closing browser:', error);
+      // Force cleanup even if there are errors
+      this.browser = null;
+      this.page = null;
+      this.isLoggedIn = false;
     }
   }
 
@@ -347,5 +374,39 @@ export class PuppeteerManager {
       isInitialized: !!this.browser,
       isLoggedIn: this.isLoggedIn,
     };
+  }
+
+  getPage(): puppeteer.Page | null {
+    return this.page;
+  }
+
+  async cleanup(): Promise<void> {
+    try {
+      // Close page first
+      if (this.page && !this.page.isClosed()) {
+        await this.page.close().catch(err => console.log('Error closing page:', err));
+        this.page = null;
+      }
+      
+      // Then close browser
+      if (this.browser) {
+        await this.browser.close().catch(err => console.log('Error closing browser:', err));
+        this.browser = null;
+      }
+      
+      this.isLoggedIn = false;
+      
+      await storage.logActivity({
+        type: 'system',
+        description: 'Browser cleanup completed',
+        metadata: {},
+      });
+    } catch (error) {
+      console.error('Error during cleanup:', error);
+      // Force reset even if cleanup fails
+      this.browser = null;
+      this.page = null;
+      this.isLoggedIn = false;
+    }
   }
 }
