@@ -90,13 +90,17 @@ export default function Login() {
         // Check if popup is still open
         try {
           if (loginWindow.closed) {
-             setIsConnecting(false);
-             setLoginStatus('idle');
-            toast({
-              title: "Login Verification Failed",
-              description: 'Login window was closed. Please complete the login process and try again.',
-              variant: "destructive",
-            });
+            // window closed unexpectedly; check login status one last time
+            const closedResult = await checkLoginStatus();
+            if (!closedResult.success) {
+              setIsConnecting(false);
+              setLoginStatus('idle');
+              toast({
+                title: "Login Verification Failed",
+                description: 'Login window was closed. Please complete the login process and try again.',
+                variant: "destructive",
+              });
+            }
             return;
           }
         } catch (e) {
