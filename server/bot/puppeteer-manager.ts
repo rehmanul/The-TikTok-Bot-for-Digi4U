@@ -102,8 +102,22 @@ export class PuppeteerManager {
       await this.page.waitForSelector('input[type="password"], input[name="password"]', { timeout: 10000 });
       await this.page.type('input[type="password"], input[name="password"]', password);
 
-      // Click login button
-      await this.page.click('button[type="submit"], button:contains("Log in")');
+      // Click login button - CSS :contains is not valid, so try direct selector first
+      try {
+        await this.page.click('button[type="submit"]');
+      } catch {
+        // Fallback: find button containing text "Log in" or "Login" and click it
+        await this.page.evaluate(() => {
+          const buttons = Array.from(document.querySelectorAll('button')) as HTMLElement[];
+          const loginButton = buttons.find(btn =>
+            btn.textContent?.trim().toLowerCase() === 'log in' ||
+            btn.textContent?.trim().toLowerCase() === 'login'
+          );
+          if (loginButton) {
+            (loginButton as HTMLElement).click();
+          }
+        });
+      }
 
       // Wait for navigation or error
       await this.page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 });
@@ -219,7 +233,7 @@ export class PuppeteerManager {
         // Get the generated link
         const linkElement = await this.page.$('.collaboration-link, [data-testid="collaboration-link"]');
         if (linkElement) {
-          const link = await linkElement.textContent();
+          const link = await linkElement.evaluate(el => el.textContent);
           if (link) invitationLinks.push(link.trim());
         }
 
@@ -376,7 +390,7 @@ export class PuppeteerManager {
     };
   }
 
-  getPage(): puppeteer.Page | null {
+  getPage(): Page | null {
     return this.page;
   }
 
