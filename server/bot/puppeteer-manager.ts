@@ -27,9 +27,12 @@ export class PuppeteerManager {
         '--disable-gpu'
       ];
 
+      const executablePath =
+        process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
+
       this.browser = await puppeteerExtra.launch({
         headless: true, // Force headless for Replit
-        executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+        executablePath,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
