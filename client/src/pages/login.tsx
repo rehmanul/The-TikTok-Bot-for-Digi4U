@@ -30,132 +30,130 @@ export default function Login() {
       const loginWindow = window.open(
         'https://seller-uk-accounts.tiktok.com/account/login',
         'tiktok-login',
-        'width=800,height=600,scrollbars=yes,resizable=yes'
+        'width=1000,height=700,scrollbars=yes,resizable=yes'
       );
 
       if (!loginWindow) {
-        throw new Error('Please allow popups to login to TikTok');
+        throw new Error('Please allow popups for this site to continue');
       }
 
       setLoginStatus('manual');
 
       // Monitor the login window
-      const checkInterval = setInterval(() => {
+      let attempts = 0;
+      const maxAttempts = 90; // 3 minutes timeout
+      let lastError = '';
+
+      const checkLoginStatus = async (): Promise<{ success: boolean; error?: string }> => {
+        try {
+          const response = await fetch('/api/bot/check-login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          const result = await response.json();
+
+          if (result.success && result.isLoggedIn) {
+            loginWindow.close();
+            setLoginStatus('success');
+            toast({
+              title: "Login Successful",
+              description: result.message || "Successfully connected to TikTok Seller Center",
+            });
+
+            // Redirect to dashboard immediately since login is verified
+            setTimeout(() => {
+              setLocation('/dashboard');
+              // Force a page refresh to ensure the app recognizes the new auth state
+              window.location.reload();
+            }, 1500);
+            return { success: true };
+          }
+
+          // Update UI with current status
+          if (result.message) {
+            console.log('Login status:', result.message);
+          }
+
+          return { success: false, error: result.error };
+        } catch (error) {
+          console.error('Login check failed:', error);
+          return { success: false, error: 'Network error during verification' };
+        }
+      };
+
+      const pollLogin = async () => {
+        attempts++;
+
+        // Check if popup is still open
         try {
           if (loginWindow.closed) {
-            clearInterval(checkInterval);
-            setLoginStatus('checking');
-            // Wait a moment before checking to ensure login cookies are set
-            setTimeout(() => checkLoginStatus(), 1000);
+             setIsConnecting(false);
+             setLoginStatus('idle');
+            toast({
+              title: "Login Verification Failed",
+              description: 'Login window was closed. Please complete the login process and try again.',
+              variant: "destructive",
+            });
+            return;
           }
-        } catch (error) {
-          // Window might be on different domain, that's expected
-        }
-      }, 1000);
-
-      // Auto-close after 10 minutes
-      setTimeout(() => {
-        if (!loginWindow.closed) {
-          loginWindow.close();
-          clearInterval(checkInterval);
+        } catch (e) {
+          // Popup might be closed or inaccessible
           setIsConnecting(false);
           setLoginStatus('idle');
           toast({
-            title: "Login Timeout",
-            description: "Login window closed automatically after 10 minutes",
+            title: "Login Verification Failed",
+            description: 'Login window closed unexpectedly. Please try again.',
             variant: "destructive",
           });
+          return;
         }
-      }, 600000);
+
+        if (attempts >= maxAttempts) {
+          try {
+            loginWindow.close();
+          } catch (e) {
+            // Ignore popup close errors
+          }
+          setIsConnecting(false);
+          setLoginStatus('idle');
+          toast({
+            title: "Login Verification Failed",
+            description: 'Login verification timeout. Please ensure you completed the login and try again.',
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const result = await checkLoginStatus();
+
+        if (!result.success) {
+          // Update last error but don't fail immediately
+          if (result.error && result.error !== lastError) {
+            lastError = result.error;
+            console.log('Login verification attempt:', attempts, 'Error:', result.error);
+          }
+
+          // Show progress to user
+          if (attempts % 10 === 0) {
+            console.log(`Checking login status... (${attempts}/${maxAttempts})`);
+          }
+
+          setTimeout(pollLogin, 2000);
+        }
+      };
+
+      // Start polling after allowing popup to load
+      setTimeout(pollLogin, 5000);
 
     } catch (error) {
       setIsConnecting(false);
       setLoginStatus('idle');
       toast({
         title: "Connection Failed",
-        description: error instanceof Error ? error.message : "Failed to open TikTok login",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const checkLoginStatus = async () => {
-    try {
-      setLoginStatus('checking');
-      
-      // Add a small delay to ensure the login process has completed
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-      const response = await fetch('/api/bot/check-login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('Login verification result:', result);
-
-      if (result.success && result.isLoggedIn) {
-        setLoginStatus('success');
-        toast({
-          title: "Login Successful",
-          description: result.message || "Successfully connected to TikTok Seller Center",
-        });
-
-        // Redirect to dashboard after short delay
-        setTimeout(() => {
-          setLocation('/dashboard');
-        }, 2000);
-      } else {
-        setIsConnecting(false);
-        setLoginStatus('idle');
-        
-        // Provide more specific error messages
-        let errorMessage = result.message || "Please complete the login process in TikTok Seller Center";
-        
-        if (result.error) {
-          if (result.error.includes('timeout')) {
-            errorMessage = "Login verification timed out. Please try again.";
-          } else if (result.error.includes('navigation')) {
-            errorMessage = "Unable to access TikTok Seller Center. Please check your connection.";
-          }
-        }
-
-        toast({
-          title: "Login Verification Failed",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Login check error:', error);
-      setIsConnecting(false);
-      setLoginStatus('idle');
-      
-      let errorMessage = "Unable to verify login status. Please try again.";
-      
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          errorMessage = "Login verification timed out. Please try again.";
-        } else if (error.message.includes('fetch')) {
-          errorMessage = "Network error. Please check your connection and try again.";
-        }
-      }
-
-      toast({
-        title: "Verification Failed",
-        description: errorMessage,
+        description: error instanceof Error ? error.message : "Failed to initiate login process",
         variant: "destructive",
       });
     }
