@@ -32,3 +32,50 @@ git clone https://github.com/rehmanul/The-TikTok-Bot-for-Digi4U.git
 cd The-TikTok-Bot-for-Digi4U
 npm install
 pip install -r requirements.txt  # If backend Python exists
+
+# Initialize database tables
+npm run db:push
+```
+
+### 2. Configure Environment
+
+Create a `.env` file in the project root with your credentials:
+
+```env
+PORT=5000
+DATABASE_URL=postgres://user:password@host:5432/database
+TIKTOK_EMAIL=your-email@example.com
+TIKTOK_PASSWORD=your-password
+SESSION_SECRET=replace-with-random-string
+```
+
+### 3. Run in Development
+
+Start the Express API and Vite client together:
+
+```bash
+npm run dev
+```
+
+### 4. Build for Production
+
+Compile the client and server bundles:
+
+```bash
+npm run build
+```
+
+### 5. Start in Production
+
+After building, launch the bot with:
+
+```bash
+npm run start
+```
+
+### 6. Deploy
+
+The repository includes a `render.yaml` file for deployment to
+[Render](https://render.com). Create a new Web Service from this repo and
+provide the same environment variables configured above. Render will run the
+build and start commands automatically.
