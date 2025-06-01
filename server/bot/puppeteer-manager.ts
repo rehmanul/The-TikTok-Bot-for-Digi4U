@@ -1,4 +1,5 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
+import { existsSync } from 'fs';
 import puppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { storage } from '../storage';
@@ -27,8 +28,10 @@ export class PuppeteerManager {
         '--disable-gpu'
       ];
 
-      const executablePath =
-        process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
+      const envPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+      const executablePath = envPath && existsSync(envPath)
+        ? envPath
+        : puppeteer.executablePath();
 
       this.browser = await puppeteerExtra.launch({
         headless: true, // Force headless for Replit
@@ -67,7 +70,10 @@ export class PuppeteerManager {
       await storage.logActivity({
         type: 'system',
         description: 'Browser initialized successfully',
-        metadata: { headless: process.env.PUPPETEER_HEADLESS !== 'false' },
+        metadata: {
+          headless: process.env.PUPPETEER_HEADLESS !== 'false',
+          executablePath,
+        },
       });
     } catch (error) {
       await storage.logActivity({
