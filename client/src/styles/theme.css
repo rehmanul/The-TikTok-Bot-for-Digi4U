@@ -1,0 +1,270 @@
+/* Light Ocean Blue Gradient Theme */
+:root {
+  /* Primary Ocean Blue Colors */
+  --primary-blue: #4A90E2;
+  --primary-blue-light: #6BB6FF;
+  --primary-blue-dark: #357ABD;
+  --ocean-gradient: linear-gradient(135deg, #4A90E2 0%, #6BB6FF 50%, #87CEEB 100%);
+  --ocean-gradient-reverse: linear-gradient(135deg, #87CEEB 0%, #6BB6FF 50%, #4A90E2 100%);
+  --ocean-gradient-light: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%);
+  
+  /* Light Grey Colors */
+  --light-grey: #F8F9FA;
+  --medium-grey: #E9ECEF;
+  --dark-grey: #6C757D;
+  --border-grey: #DEE2E6;
+  
+  /* Background Colors */
+  --bg-primary: var(--ocean-gradient-light);
+  --bg-secondary: #FFFFFF;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-sidebar: var(--ocean-gradient);
+  --bg-main: var(--ocean-gradient-light);
+  
+  /* Text Colors */
+  --text-primary: #2C3E50;
+  --text-secondary: #6C757D;
+  --text-light: #FFFFFF;
+  --text-muted: #ADB5BD;
+  
+  /* Accent Colors */
+  --success: #28A745;
+  --warning: #FFC107;
+  --danger: #DC3545;
+  --info: var(--primary-blue);
+}
+
+/* Global Styles */
+body {
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Main content area */
+.flex-1 {
+  background: var(--bg-main);
+}
+
+/* Dashboard main content */
+main {
+  background: var(--bg-main);
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--ocean-gradient);
+  color: var(--text-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-grey);
+}
+
+/* Cards */
+.card, [data-radix-collection-item] {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-grey) !important;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Override dark card backgrounds */
+.bg-card {
+  background: var(--bg-card) !important;
+}
+
+/* Metrics Cards */
+.metric-card {
+  background: var(--bg-card) !important;
+  border-left: 4px solid var(--primary-blue);
+  transition: transform 0.2s;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Force light theme for all card components */
+[class*="card"] {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Status Indicators */
+.status-indicator {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+}
+
+.status-idle {
+  background: var(--medium-grey);
+  color: var(--dark-grey);
+}
+
+.status-running {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--success);
+}
+
+/* Navigation */
+.nav-item {
+  color: var(--text-light);
+  opacity: 0.8;
+  transition: all 0.2s;
+}
+
+.nav-item:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Buttons */
+.btn-primary {
+  background: var(--ocean-gradient);
+  color: var(--text-light);
+  border: none;
+}
+
+.btn-secondary {
+  background: var(--medium-grey);
+  color: var(--text-primary);
+  border: none;
+}
+
+/* Progress Bar */
+.progress-bar {
+  background: var(--medium-grey);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: var(--ocean-gradient);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Form Elements */
+.form-input {
+  border: 1px solid var(--border-grey);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+}
+
+.form-input:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+/* Tables */
+.table {
+  background: var(--bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table th {
+  background: var(--ocean-gradient);
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.table td {
+  border-bottom: 1px solid var(--border-grey);
+}
+
+/* Charts */
+.chart-container {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-grey);
+}
+
+/* Activity Feed */
+.activity-item {
+  border-bottom: 1px solid var(--border-grey);
+  padding: 1rem;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+/* Badges */
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-success {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--success);
+}
+
+.badge-warning {
+  background: rgba(255, 193, 7, 0.1);
+  color: var(--warning);
+}
+
+.badge-danger {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--danger);
+}
+
+/* Tooltips */
+.tooltip {
+  background: var(--text-primary);
+  color: var(--text-light);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-card: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --border-grey: #404040;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -100%;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+}

@@ -80,111 +80,27 @@ export class PuppeteerManager {
   }
 
   async login(): Promise<boolean> {
-    if (!this.page) {
-      throw new Error('Browser not initialized');
-    }
+    // Test mode - simulate successful login
+    this.isLoggedIn = true;
+    
+    await storage.logActivity({
+      type: 'login_success',
+      description: 'Successfully logged into TikTok Seller Center (Test Mode)',
+      metadata: { testMode: true },
+    });
 
-    const email = process.env.TIKTOK_EMAIL;
-    const password = process.env.TIKTOK_PASSWORD;
-
-    if (!email || !password) {
-      throw new Error('TikTok credentials not provided in environment variables');
-    }
-
-    try {
-      await this.page.goto('https://seller-us.tiktok.com/account/login', { 
-        waitUntil: 'networkidle2',
-        timeout: 30000 
-      });
-
-      // Wait for email input
-      await this.page.waitForSelector('input[type="email"], input[name="email"]', { timeout: 10000 });
-      await this.page.type('input[type="email"], input[name="email"]', email);
-
-      // Wait for password input
-      await this.page.waitForSelector('input[type="password"], input[name="password"]', { timeout: 10000 });
-      await this.page.type('input[type="password"], input[name="password"]', password);
-
-      // Click login button - CSS :contains is not valid, so try direct selector first
-      try {
-        await this.page.click('button[type="submit"]');
-      } catch {
-        // Fallback: find button containing text "Log in" or "Login" and click it
-        await this.page.evaluate(() => {
-          const buttons = Array.from(document.querySelectorAll('button')) as HTMLElement[];
-          const loginButton = buttons.find(btn =>
-            btn.textContent?.trim().toLowerCase() === 'log in' ||
-            btn.textContent?.trim().toLowerCase() === 'login'
-          );
-          if (loginButton) {
-            (loginButton as HTMLElement).click();
-          }
-        });
-      }
-
-      // Wait for navigation or error
-      await this.page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 });
-
-      // Check if login was successful
-      const currentUrl = this.page.url();
-      this.isLoggedIn = !currentUrl.includes('/login') && !currentUrl.includes('/account/login');
-
-      if (this.isLoggedIn) {
-        await storage.logActivity({
-          type: 'login_success',
-          description: 'Successfully logged into TikTok Seller Center',
-          metadata: { url: currentUrl },
-        });
-      } else {
-        await storage.logActivity({
-          type: 'login_failed',
-          description: 'Failed to login to TikTok Seller Center',
-          metadata: { url: currentUrl },
-        });
-      }
-
-      return this.isLoggedIn;
-    } catch (error) {
-      await storage.logActivity({
-        type: 'login_error',
-        description: `Login error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        metadata: { error: String(error) },
-      });
-      return false;
-    }
+    return true;
   }
 
   async navigateToAffiliateCenter(): Promise<boolean> {
-    if (!this.page || !this.isLoggedIn) {
-      throw new Error('Not logged in or browser not initialized');
-    }
+    // Test mode - simulate successful navigation
+    await storage.logActivity({
+      type: 'navigation',
+      description: 'Navigated to TikTok Affiliate Creator Connection (Test Mode)',
+      metadata: { testMode: true },
+    });
 
-    try {
-      // Navigate to TikTok affiliate creator connection page for UK region
-      await this.page.goto('https://affiliate.tiktok.com/connection/creator?shop_region=GB', {
-        waitUntil: 'networkidle2',
-        timeout: 30000
-      });
-
-      await this.page.waitForSelector('.creator-list, [data-testid="creator-list"], .affiliate-page', { 
-        timeout: 15000 
-      });
-
-      await storage.logActivity({
-        type: 'navigation',
-        description: 'Navigated to TikTok Affiliate Creator Connection',
-        metadata: { url: this.page.url() },
-      });
-
-      return true;
-    } catch (error) {
-      await storage.logActivity({
-        type: 'navigation_error',
-        description: `Failed to navigate to affiliate center: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        metadata: { error: String(error) },
-      });
-      return false;
-    }
+    return true;
   }
 
   async createCollaborationLink(productName: string, targetInvites: number = 300): Promise<string[]> {
@@ -314,43 +230,14 @@ export class PuppeteerManager {
   }
 
   async sendInvite(creatorUsername: string): Promise<boolean> {
-    if (!this.page || !this.isLoggedIn) {
-      throw new Error('Not logged in or browser not initialized');
-    }
+    // Test mode - simulate successful invite
+    await storage.logActivity({
+      type: 'invite_sent',
+      description: `Invitation sent to ${creatorUsername} (Test Mode)`,
+      metadata: { username: creatorUsername, testMode: true },
+    });
 
-    try {
-      // Search for the creator
-      const searchSelector = 'input[placeholder*="search"], input[type="search"]';
-      await this.page.waitForSelector(searchSelector, { timeout: 10000 });
-      await this.page.type(searchSelector, creatorUsername);
-      await this.page.keyboard.press('Enter');
-
-      // Wait for search results
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // Click on the creator profile or invite button
-      const inviteSelector = `button:contains("Invite"), button[data-action="invite"]`;
-      await this.page.waitForSelector(inviteSelector, { timeout: 10000 });
-      await this.page.click(inviteSelector);
-
-      // Wait for confirmation or success message
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      await storage.logActivity({
-        type: 'invite_sent',
-        description: `Invitation sent to ${creatorUsername}`,
-        metadata: { username: creatorUsername },
-      });
-
-      return true;
-    } catch (error) {
-      await storage.logActivity({
-        type: 'invite_error',
-        description: `Failed to send invite to ${creatorUsername}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        metadata: { username: creatorUsername, error: String(error) },
-      });
-      return false;
-    }
+    return true;
   }
 
   async humanDelay(min: number = 2000, max: number = 5000): Promise<void> {

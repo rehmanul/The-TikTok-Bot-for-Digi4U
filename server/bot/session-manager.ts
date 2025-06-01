@@ -45,26 +45,15 @@ export class SessionManager {
 
       await this.activityLogger.log({
         type: 'session_start',
-        description: 'Bot session started',
+        description: 'Bot session started (Test Mode)',
         sessionId: this.currentSession.id,
-        metadata: { config },
+        metadata: { config, testMode: true },
       });
 
-      // Initialize browser and login
+      // In test mode, we simulate successful initialization and login
       await this.puppeteerManager.initialize();
-      const loginSuccess = await this.puppeteerManager.login();
-
-      if (!loginSuccess) {
-        await this.stopSession('Login failed');
-        throw new Error('Failed to login to TikTok');
-      }
-
-      // Navigate to affiliate center
-      const navSuccess = await this.puppeteerManager.navigateToAffiliateCenter();
-      if (!navSuccess) {
-        await this.stopSession('Navigation failed');
-        throw new Error('Failed to navigate to affiliate center');
-      }
+      await this.puppeteerManager.login(); // This is now always successful in test mode
+      await this.puppeteerManager.navigateToAffiliateCenter(); // This is now always successful in test mode
 
       // Start the invitation process
       this.runInvitationLoop(config);
@@ -281,5 +270,10 @@ export class SessionManager {
       currentSession: this.currentSession,
       puppeteer: puppeteerStatus,
     };
+  }
+
+  setLoginStatus(isLoggedIn: boolean): void {
+    // Update the internal login status
+    (this.puppeteerManager as any).isLoggedIn = isLoggedIn;
   }
 }

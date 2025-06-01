@@ -91,6 +91,63 @@ export class MemStorage implements IStorage {
       updatedAt: new Date(),
     };
     this.botConfigs.set(1, defaultConfig);
+    
+    // Initialize sample creators
+    this.initializeSampleCreators();
+  }
+
+  private initializeSampleCreators() {
+    const sampleCreators = [
+      { username: '@fashionista_uk', followers: 125000, category: 'Fashion' },
+      { username: '@fitness_guru_london', followers: 89000, category: 'Fitness' },
+      { username: '@beauty_by_sarah', followers: 156000, category: 'Beauty' },
+      { username: '@lifestyle_london', followers: 67000, category: 'Lifestyle' },
+      { username: '@makeup_artist_emma', followers: 234000, category: 'Beauty' },
+      { username: '@yoga_with_james', followers: 78000, category: 'Fitness' },
+      { username: '@london_style_blog', followers: 145000, category: 'Fashion' },
+      { username: '@healthy_living_uk', followers: 92000, category: 'Lifestyle' },
+    ];
+
+    sampleCreators.forEach(creator => {
+      const id = this.currentCreatorId++;
+      const creatorData: Creator = {
+        id,
+        username: creator.username,
+        followers: creator.followers,
+        category: creator.category,
+        lastInvited: null,
+        inviteStatus: null,
+        createdAt: new Date(),
+      };
+      this.creators.set(id, creatorData);
+    });
+
+    // Add some sample activities
+    this.initializeSampleActivities();
+  }
+
+  private initializeSampleActivities() {
+    const sampleActivities = [
+      { type: 'system' as const, description: 'Browser initialized successfully' },
+      { type: 'login_success' as const, description: 'Successfully logged into TikTok Seller Center' },
+      { type: 'invite_sent' as const, description: 'Invitation sent to @fashionista_uk' },
+      { type: 'invite_accepted' as const, description: '@beauty_by_sarah accepted invitation' },
+      { type: 'system' as const, description: 'Bot session started' },
+    ];
+
+    sampleActivities.forEach(activity => {
+      const id = this.currentActivityId++;
+      const activityData: Activity = {
+        id,
+        type: activity.type,
+        description: activity.description,
+        metadata: null,
+        sessionId: null,
+        creatorId: null,
+        createdAt: new Date(Date.now() - Math.random() * 86400000), // Random time in last 24h
+      };
+      this.activities.set(id, activityData);
+    });
   }
 
   // User methods

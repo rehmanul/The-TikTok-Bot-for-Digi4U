@@ -1,3 +1,4 @@
+import { Link } from 'wouter';
 import { MetricsCards } from '@/components/metrics-cards';
 import { BotControl } from '@/components/bot-control';
 import { ActivityFeed } from '@/components/activity-feed';
@@ -93,18 +94,24 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button variant="outline" className="h-20 flex flex-col space-y-2">
-                  <Users className="w-6 h-6" />
-                  <span className="text-sm">View Creators</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex flex-col space-y-2">
-                  <BarChart3 className="w-6 h-6" />
-                  <span className="text-sm">Analytics</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex flex-col space-y-2">
-                  <Activity className="w-6 h-6" />
-                  <span className="text-sm">Activity Logs</span>
-                </Button>
+                <Link href="/creators">
+                  <Button variant="outline" className="h-20 flex flex-col space-y-2 w-full">
+                    <Users className="w-6 h-6" />
+                    <span className="text-sm">View Creators</span>
+                  </Button>
+                </Link>
+                <Link href="/analytics">
+                  <Button variant="outline" className="h-20 flex flex-col space-y-2 w-full">
+                    <BarChart3 className="w-6 h-6" />
+                    <span className="text-sm">Analytics</span>
+                  </Button>
+                </Link>
+                <Link href="/logs">
+                  <Button variant="outline" className="h-20 flex flex-col space-y-2 w-full">
+                    <Activity className="w-6 h-6" />
+                    <span className="text-sm">Activity Logs</span>
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
