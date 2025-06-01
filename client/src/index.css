@@ -2,13 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 0 0% 0%; /* #000000 - Black */
-  --foreground: 0 0% 100%; /* #FFFFFF - White */
-  --card: 0 0% 10%; /* #1A1A1A */
-  --border: 0 0% 20%; /* #333333 */
-}
-
 @layer base {
   * {
     @apply border-border;
@@ -16,34 +9,11 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: system-ui, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 }
 
-/* Basic component styles */
-.sidebar {
-  background: #000000;
-  color: #fff;
-}
-
-.card {
-  background: #1A1A1A;
-  color: #fff;
-  border: 1px solid #333;
-}
-
-.user-profile {
-  background: #1A1A1A;
-  border: 1px solid #333;
-}
-
-.status-badge {
-  background: #1A1A1A;
-  color: #fff;
-  border: 1px solid #333;
-}
-
-/* Basic responsive design */
+/* Responsive design */
 @media (max-width: 768px) {
   .sidebar {
     width: 4rem;
