@@ -308,10 +308,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current user endpoint
   app.get("/api/user/current", async (req: Request, res: Response) => {
     try {
-      // Return the current user data
+      const user = await storage.getUser(1); // Get default user
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
       res.json({
         name: 'Digi4U Repair',
-        email: 'rehman.shoj2@gmail.com',
+        email: user.email,
+        imageUrl: user.imageUrl,
         role: 'Administrator'
       });
     } catch (error) {

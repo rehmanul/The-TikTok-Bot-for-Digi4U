@@ -23,6 +23,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
 
   // Bot sessions
   createBotSession(session: InsertBotSession): Promise<BotSession>;
@@ -75,8 +76,22 @@ export class MemStorage implements IStorage {
     this.currentActivityId = 1;
     this.currentConfigId = 1;
 
+    // Initialize default user
+    this.initializeDefaultUser();
+    
     // Initialize default config
     this.initializeDefaultConfig();
+  }
+
+  private initializeDefaultUser() {
+    const defaultUser: User = {
+      id: 1,
+      username: 'digi4u_admin',
+      email: 'rehman.sho@gmail.com',
+      imageUrl: null,
+      createdAt: new Date(),
+    };
+    this.users.set(1, defaultUser);
   }
 
   private initializeDefaultConfig() {
@@ -86,7 +101,15 @@ export class MemStorage implements IStorage {
       maxFollowers: 1000000,
       dailyLimit: 500,
       actionDelay: 45000,
-      categories: ['Beauty', 'Fashion', 'Lifestyle', 'Fitness'],
+      categories: [
+        'REPAIR PARTS',
+        'TABLET PARTS', 
+        'PARTS & TOOLS',
+        'GADGET & ACCESSORIES',
+        'SCOOTER',
+        'BUSSINESS PARTNERS',
+        'CONTACT'
+      ],
       isActive: false,
       updatedAt: new Date(),
     };
@@ -98,14 +121,12 @@ export class MemStorage implements IStorage {
 
   private initializeSampleCreators() {
     const sampleCreators = [
-      { username: '@fashionista_uk', followers: 125000, category: 'Fashion' },
-      { username: '@fitness_guru_london', followers: 89000, category: 'Fitness' },
-      { username: '@beauty_by_sarah', followers: 156000, category: 'Beauty' },
-      { username: '@lifestyle_london', followers: 67000, category: 'Lifestyle' },
-      { username: '@makeup_artist_emma', followers: 234000, category: 'Beauty' },
-      { username: '@yoga_with_james', followers: 78000, category: 'Fitness' },
-      { username: '@london_style_blog', followers: 145000, category: 'Fashion' },
-      { username: '@healthy_living_uk', followers: 92000, category: 'Lifestyle' },
+      { username: '@repair_expert', followers: 125000, category: 'REPAIR PARTS' },
+      { username: '@tablet_repair_uk', followers: 89000, category: 'TABLET PARTS' },
+      { username: '@tools_expert', followers: 156000, category: 'PARTS & TOOLS' },
+      { username: '@gadget_reviews', followers: 67000, category: 'GADGET & ACCESSORIES' },
+      { username: '@scooter_pro', followers: 234000, category: 'SCOOTER' },
+      { username: '@business_tech', followers: 78000, category: 'BUSSINESS PARTNERS' }
     ];
 
     sampleCreators.forEach(creator => {
@@ -130,7 +151,7 @@ export class MemStorage implements IStorage {
     const sampleActivities = [
       { type: 'system' as const, description: 'Browser initialized successfully' },
       { type: 'login_success' as const, description: 'Successfully logged into TikTok Seller Center' },
-      { type: 'invite_sent' as const, description: 'Invitation sent to @fashionista_uk' },
+      { type: 'invite_sent' as const, description: 'Invitation sent to @home_supplies_expert' },
       { type: 'invite_accepted' as const, description: '@beauty_by_sarah accepted invitation' },
       { type: 'system' as const, description: 'Bot session started' },
     ];
@@ -164,6 +185,15 @@ export class MemStorage implements IStorage {
     const user: User = { ...insertUser, id };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, ...updates };
+    this.users.set(id, updatedUser);
+    return updatedUser;
   }
 
   // Bot session methods

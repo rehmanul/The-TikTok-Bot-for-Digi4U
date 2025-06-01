@@ -1,0 +1,41 @@
+.user-profile-section {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.profile-image-container {
+  margin-right: 1rem;
+}
+
+.profile-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e74c3c;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.user-email {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  word-break: normal;
+  overflow-wrap: break-word;
+  display: block;
+  width: 100%;
+}

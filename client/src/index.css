@@ -8,9 +8,19 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
+}
+
+/* Quick Actions: ensure color contrast and dark/light support */
+.quick-actions {
+  @apply flex gap-2 mb-4;
+}
+.quick-action-btn {
+  @apply rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors duration-200;
+  @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  @apply dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80;
 }
 
 /* Responsive design */
@@ -22,4 +32,22 @@
   .sidebar-text {
     display: none;
   }
+}
+
+/* Dark/light mode helpers */
+:root {
+  color-scheme: light dark;
+}
+html.light body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+html.dark body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Utility for smooth theme transition */
+html, body {
+  transition: background-color 0.3s, color 0.3s;
 }

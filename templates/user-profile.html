@@ -1,0 +1,13 @@
+<div class="user-profile-section">
+  <div class="profile-image-container">
+    <img id="userProfileImage" 
+         src="{{ user.profile_image or '/static/images/digi4u-icon.png' }}" 
+         alt="User Profile"
+         class="profile-image"
+         onerror="this.src='/static/images/digi4u-icon.png'">
+  </div>
+  <div class="user-info">
+    <h3 class="user-name">{{ user.name or 'User' }}</h3>
+    <p class="user-email">{{ user.email }}</p>
+  </div>
+</div>

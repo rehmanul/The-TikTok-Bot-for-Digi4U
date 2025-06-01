@@ -1,14 +1,8 @@
-<<<<<<< HEAD
 import puppeteer, { Browser, Page, LaunchOptions } from 'puppeteer';
-=======
-import puppeteer, { Browser, Page } from 'puppeteer';
-import { existsSync } from 'fs';
->>>>>>> e5ae5d93dc75b181d5ae0b5ec1b47f2eba392c0a
 import puppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { storage } from '../storage';
 import * as fs from 'fs';
-import * as path from 'path';
 
 puppeteerExtra.use(StealthPlugin());
 
@@ -67,19 +61,8 @@ export class PuppeteerManager {
         }
       }
 
-<<<<<<< HEAD
       const launchOptions: LaunchOptions = {
         headless: true,
-=======
-      const envPath = process.env.PUPPETEER_EXECUTABLE_PATH;
-      const executablePath = envPath && existsSync(envPath)
-        ? envPath
-        : puppeteer.executablePath();
-
-      this.browser = await puppeteerExtra.launch({
-        headless: true, // Force headless for Replit
-        executablePath,
->>>>>>> e5ae5d93dc75b181d5ae0b5ec1b47f2eba392c0a
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
@@ -123,15 +106,9 @@ export class PuppeteerManager {
       await storage.logActivity({
         type: 'system',
         description: 'Browser initialized successfully',
-<<<<<<< HEAD
         metadata: { 
           headless: true,
           executablePath: executablePath || 'default'
-=======
-        metadata: {
-          headless: process.env.PUPPETEER_HEADLESS !== 'false',
-          executablePath,
->>>>>>> e5ae5d93dc75b181d5ae0b5ec1b47f2eba392c0a
         },
       });
     } catch (error) {
@@ -145,16 +122,96 @@ export class PuppeteerManager {
   }
 
   async login(): Promise<boolean> {
-    // Test mode - simulate successful login
-    this.isLoggedIn = true;
-    
-    await storage.logActivity({
-      type: 'login_success',
-      description: 'Successfully logged into TikTok Seller Center (Test Mode)',
-      metadata: { testMode: true },
-    });
+    try {
+      if (!this.page) throw new Error('Browser not initialized');
 
-    return true;
+      // Navigate to TikTok Seller login page
+      await this.page.goto('https://seller-uk.tiktok.com/account/login', {
+        waitUntil: 'networkidle2',
+        timeout: 30000
+      });
+
+      // Wait for login to complete (this will happen manually in the popup window)
+      // We'll know it's complete when we can access the dashboard
+      try {
+        await this.page.waitForNavigation({
+          waitUntil: 'networkidle2',
+          timeout: 300000 // 5 minutes timeout for manual login
+        });
+
+        // Check if we're logged in by looking for dashboard elements
+        const isDashboard = await this.page.evaluate(() => {
+          return window.location.href.includes('/dashboard');
+        });
+
+        if (isDashboard) {
+          this.isLoggedIn = true;
+          
+          // Fetch user profile info after successful login
+          const userInfo = await this.fetchUserProfile();
+          
+          await storage.logActivity({
+            type: 'login_success',
+            description: 'Successfully logged into TikTok Seller Center',
+            metadata: { userInfo },
+          });
+
+          return true;
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        throw error;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
+  }
+
+  async fetchUserProfile(): Promise<{ email: string; imageUrl: string | null }> {
+    if (!this.page || !this.isLoggedIn) {
+      throw new Error('Not logged in or browser not initialized');
+    }
+
+    try {
+      // Navigate to profile settings page
+      await this.page.goto('https://seller-uk.tiktok.com/account/settings', {
+        waitUntil: 'networkidle2',
+        timeout: 30000
+      });
+
+      // Extract user info from the page
+      const userInfo = await this.page.evaluate(() => {
+        // These selectors need to be updated based on actual TikTok Seller page structure
+        const emailElement = document.querySelector('[data-testid="email-field"], .email-field, input[name="email"]');
+        const imageElement = document.querySelector('[data-testid="profile-image"], .profile-image img, .avatar img');
+
+        return {
+          email: emailElement ? (emailElement as HTMLInputElement).value || emailElement.textContent : '',
+          imageUrl: imageElement ? (imageElement as HTMLImageElement).src : null
+        };
+      });
+
+      if (!userInfo.email) {
+        throw new Error('Could not fetch user email');
+      }
+
+      // Update user info in storage
+      const user = await storage.getUser(1);
+      if (user) {
+        await storage.updateUser(user.id, {
+          email: userInfo.email,
+          imageUrl: userInfo.imageUrl
+        });
+      }
+
+      return userInfo;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      throw error;
+    }
   }
 
   async navigateToAffiliateCenter(): Promise<boolean> {
@@ -353,13 +410,13 @@ export class PuppeteerManager {
     try {
       // Close page first
       if (this.page && !this.page.isClosed()) {
-        await this.page.close().catch(err => console.log('Error closing page:', err));
+        await this.page.close().catch((err: any) => console.log('Error closing page:', err));
         this.page = null;
       }
       
       // Then close browser
       if (this.browser) {
-        await this.browser.close().catch(err => console.log('Error closing browser:', err));
+        await this.browser.close().catch((err: any) => console.log('Error closing browser:', err));
         this.browser = null;
       }
       

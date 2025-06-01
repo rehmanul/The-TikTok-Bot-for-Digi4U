@@ -1,0 +1,20 @@
+<div class="category-selector">
+  <h3>Select Categories</h3>
+  <div class="category-grid">
+    {% for main_category, subcategories in categories.items() %}
+    <div class="category-group">
+      <h4 class="main-category">{{ main_category }}</h4>
+      <div class="subcategory-list">
+        {% for subcategory in subcategories %}
+        <label class="category-item">
+          <input type="checkbox" 
+                 name="categories" 
+                 value="{{ main_category }}/{{ subcategory }}">
+          <span class="category-label">{{ subcategory }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
