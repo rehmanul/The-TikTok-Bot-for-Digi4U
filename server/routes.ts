@@ -305,6 +305,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current user endpoint
+  app.get("/api/user/current", async (req: Request, res: Response) => {
+    try {
+      // Return the current user data
+      res.json({
+        name: 'Digi4U Repair',
+        email: 'rehman.shoj2@gmail.com',
+        role: 'Administrator'
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to fetch user data",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Health check endpoint
   app.get("/api/health", async (req: Request, res: Response) => {
     try {

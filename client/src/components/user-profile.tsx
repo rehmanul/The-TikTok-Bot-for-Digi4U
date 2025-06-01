@@ -1,14 +1,47 @@
 import { User } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
 
-// User data
-const user = {
-  name: 'Digi4U Repair',
-  email: 'admin@digi4u.com',
-  role: 'Administrator'
-};
+// User data interface
+interface UserData {
+  name: string;
+  email: string;
+  role: string;
+}
 
 export function UserProfile() {
+  const [user, setUser] = useState<UserData>({
+    name: 'Loading...',
+    email: 'Loading...',
+    role: 'Loading...'
+  });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('/api/user/current');
+        if (response.ok) {
+          const userData = await response.json();
+          setUser({
+            name: userData.name || 'Digi4U Repair',
+            email: userData.email || 'rehman.shoj2@gmail.com',
+            role: userData.role || 'Administrator'
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+        // Fallback to default data if fetch fails
+        setUser({
+          name: 'Digi4U Repair',
+          email: 'rehman.shoj2@gmail.com',
+          role: 'Administrator'
+        });
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   return (
     <Card className="user-profile p-4 bg-gradient-to-br from-background to-muted border-none">
       <div className="flex items-center space-x-3">
