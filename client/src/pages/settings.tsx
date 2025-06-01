@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -26,12 +27,14 @@ interface BotConfig {
   dailyLimit: number;
   actionDelay: number;
   categories: string[];
+  subCategories: string[];
+  productNames: string[];
   isActive: boolean;
 }
 
 const categoryOptions = [
   'Beauty',
-  'Fashion', 
+  'Fashion',
   'Lifestyle',
   'Fitness',
   'Food',
@@ -45,6 +48,17 @@ const categoryOptions = [
   'Education',
   'Music'
 ];
+
+const subCategoryMap: Record<string, string[]> = {
+  Beauty: ['Makeup', 'Skincare', 'Hair'],
+  Fashion: ['Menswear', 'Womenswear', 'Accessories'],
+  Lifestyle: ['Home Decor', 'Travel', 'DIY'],
+  Fitness: ['Workout', 'Yoga', 'Nutrition'],
+  Food: ['Recipes', 'Restaurant', 'Baking'],
+  Tech: ['Gadgets', 'Software', 'Reviews'],
+  Gaming: ['Console', 'PC', 'Mobile'],
+  Entertainment: ['Movies', 'Music', 'Comedy'],
+};
 
 export default function Settings() {
   const { toast } = useToast();
@@ -61,6 +75,8 @@ export default function Settings() {
     dailyLimit: config?.dailyLimit || 500,
     actionDelay: config?.actionDelay || 45000,
     categories: config?.categories || ['Beauty', 'Fashion', 'Lifestyle'],
+    subCategories: config?.subCategories || [],
+    productNames: config?.productNames || [],
     isActive: config?.isActive || false,
   });
 
@@ -107,6 +123,13 @@ export default function Settings() {
       ? formData.categories.filter(c => c !== category)
       : [...formData.categories, category];
     updateFormData('categories', newCategories);
+  };
+
+  const toggleSubCategory = (sub: string) => {
+    const newSubs = formData.subCategories.includes(sub)
+      ? formData.subCategories.filter(c => c !== sub)
+      : [...formData.subCategories, sub];
+    updateFormData('subCategories', newSubs);
   };
 
   if (isLoading) {
@@ -229,7 +252,52 @@ export default function Settings() {
               <p className="text-xs text-muted-foreground">
                 Select categories to target. Leave none selected to target all categories.
               </p>
+              {formData.categories.map((cat) => (
+                subCategoryMap[cat] ? (
+                  <div key={cat} className="mt-2 space-y-1">
+                    <Label>{cat} Subcategories</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {subCategoryMap[cat].map((sub) => (
+                        <Button
+                          key={sub}
+                          variant={formData.subCategories.includes(sub) ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => toggleSubCategory(sub)}
+                          className={formData.subCategories.includes(sub) ? 'bg-gradient-to-r from-tiktok-primary to-tiktok-secondary' : ''}
+                        >
+                          {sub}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null
+              ))}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Product Names */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <span>Product Names</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Label htmlFor="productNames">Comma separated product names</Label>
+            <Textarea
+              id="productNames"
+              value={formData.productNames.join(', ')}
+              onChange={(e) =>
+                updateFormData(
+                  'productNames',
+                  e.target.value
+                    .split(',')
+                    .map((n) => n.trim())
+                    .filter((n) => n)
+                )
+              }
+            />
           </CardContent>
         </Card>
 
@@ -349,6 +417,24 @@ export default function Settings() {
                   </Badge>
                 ))}
               </div>
+              {formData.subCategories.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {formData.subCategories.map((sub) => (
+                    <Badge key={sub} variant="secondary" className="text-xs">
+                      {sub}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              {formData.productNames.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {formData.productNames.map((name) => (
+                    <Badge key={name} variant="secondary" className="text-xs">
+                      {name}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

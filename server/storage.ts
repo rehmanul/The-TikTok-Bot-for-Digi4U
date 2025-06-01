@@ -87,6 +87,8 @@ export class MemStorage implements IStorage {
       dailyLimit: 500,
       actionDelay: 45000,
       categories: ['Beauty', 'Fashion', 'Lifestyle', 'Fitness'],
+      subCategories: [],
+      productNames: [],
       isActive: false,
       updatedAt: new Date(),
     };
