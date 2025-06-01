@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useBotStatus } from '@/hooks/use-bot-status';
 import { useTheme } from './theme-provider';
+import { UserProfile } from './user-profile';
 import { 
   LayoutDashboard, 
   Settings, 
@@ -53,9 +54,9 @@ export function Sidebar() {
   return (
     <aside className="sidebar w-64 flex flex-col h-full">
       {/* Header */}
-      <div className="sidebar-header">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-ocean-gradient flex items-center justify-center">
+      <div className="p-4 border-b border-border/10">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-tiktok-primary to-tiktok-secondary flex items-center justify-center">
             <Wrench className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -67,6 +68,7 @@ export function Sidebar() {
             </div>
           </div>
         </div>
+        <UserProfile />
       </div>
 
       {/* Bot Status */}
@@ -126,15 +128,26 @@ export function Sidebar() {
       </nav>
 
       {/* Theme Toggle */}
-      <div className="p-4 border-t border-opacity-10 border-white">
+      <div className="p-4 border-t border-border/10">
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          className="w-full justify-start space-x-3 text-white hover:bg-white hover:bg-opacity-10"
+          className="w-full justify-between group relative overflow-hidden transition-all duration-300"
         >
-          {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+          <div className="flex items-center space-x-2">
+            <div className="relative z-10 transition-transform duration-500 transform group-hover:rotate-180">
+              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </div>
+            <span className="relative z-10">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+          </div>
+          <div className={`absolute inset-0 transition-transform duration-300 ${
+            theme === 'light' 
+              ? 'bg-gradient-to-r from-gray-900/10 to-gray-900/20' 
+              : 'bg-gradient-to-r from-yellow-500/10 to-yellow-500/20'
+          } transform ${
+            theme === 'light' ? 'translate-x-full' : 'translate-x-0'
+          } group-hover:translate-x-0`}></div>
         </Button>
       </div>
     </aside>

@@ -3,50 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0 0; /* TikTok Black */
-  --foreground: 255 255 255; /* White text */
-  --muted: 22 22 22; /* Dark gray */
-  --muted-foreground: 161 161 170; /* Light gray */
-  --popover: 0 0 0; /* Black */
-  --popover-foreground: 255 255 255; /* White */
-  --card: 22 22 22; /* Dark card background */
-  --card-foreground: 255 255 255; /* White text */
-  --border: 255 0 80; /* TikTok Pink borders */
-  --input: 22 22 22; /* Dark input background */
-  --primary: 255 0 80; /* TikTok Pink */
-  --primary-foreground: 255 255 255; /* White */
-  --secondary: 37 244 238; /* TikTok Cyan */
-  --secondary-foreground: 0 0 0; /* Black text on cyan */
-  --accent: 255 0 80; /* TikTok Pink */
-  --accent-foreground: 255 255 255; /* White */
-  --destructive: 239 68 68; /* Red */
-  --destructive-foreground: 255 255 255; /* White */
-  --ring: 255 0 80; /* TikTok Pink */
-  --radius: 0.5rem;
-  --tiktok-primary: 255 0 80; /* TikTok Pink */
-  --tiktok-secondary: 37 244 238; /* TikTok Cyan */
-}
-
-.dark {
-  --background: 0 0 0; /* #000000 - TikTok Black */
-  --foreground: 255 255 255; /* #FFFFFF - White text */
-  --muted: 22 22 22; /* #161616 - Dark gray */
-  --muted-foreground: 161 161 170; /* #A1A1AA - Light gray */
-  --popover: 0 0 0; /* #000000 - Black */
-  --popover-foreground: 255 255 255; /* #FFFFFF - White */
-  --card: 22 22 22; /* #161616 - Dark card background */
-  --card-foreground: 255 255 255; /* #FFFFFF - White text */
-  --border: 255 0 80; /* #FF0050 - TikTok Pink borders */
-  --input: 22 22 22; /* #161616 - Dark input background */
-  --primary: 255 0 80; /* #FF0050 - TikTok Pink */
-  --primary-foreground: 255 255 255; /* #FFFFFF */
-  --secondary: 37 244 238; /* #25F4EE - TikTok Cyan */
-  --secondary-foreground: 0 0 0; /* #000000 - Black text on cyan */
-  --accent: 255 0 80; /* #FF0050 - TikTok Pink */
-  --accent-foreground: 255 255 255; /* #FFFFFF */
-  --destructive: 220 38 38; /* #DC2626 */
-  --destructive-foreground: 255 255 255; /* #FFFFFF */
-  --ring: 255 0 80; /* #FF0050 - TikTok Pink */
+  --background: 0 0% 0%; /* #000000 - Black */
+  --foreground: 0 0% 100%; /* #FFFFFF - White */
+  --card: 0 0% 10%; /* #1A1A1A */
+  --border: 0 0% 20%; /* #333333 */
 }
 
 @layer base {
@@ -55,207 +15,41 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  }
-
-  /* TikTok specific utility classes */
-  .tiktok-gradient {
-    background: linear-gradient(135deg, #FF0050 0%, #25F4EE 100%);
-  }
-  
-  .tiktok-dark-gradient {
-    background: linear-gradient(135deg, #000000 0%, #161616 50%, #000000 100%);
-  }
-
-  .tiktok-primary {
-    color: hsl(var(--tiktok-primary));
-  }
-
-  .tiktok-secondary {
-    color: hsl(var(--tiktok-secondary));
-  }
-
-  .bg-tiktok-primary {
-    background-color: hsl(var(--tiktok-primary));
-  }
-
-  .bg-tiktok-secondary {
-    background-color: hsl(var(--tiktok-secondary));
-  }
-
-  /* Custom animations */
-  @keyframes pulse-slow {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-
-  .animate-pulse-slow {
-    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  /* Scrollbar styling */
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground));
-    border-radius: 2px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--foreground));
-  }
-
-  /* Status indicators */
-  .status-indicator {
-    position: relative;
-  }
-
-  .status-indicator::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-  }
-
-  .status-online::before {
-    background-color: rgb(34 197 94 / 0.3);
-  }
-
-  .status-offline::before {
-    background-color: rgb(239 68 68 / 0.3);
-  }
-
-  @keyframes ping {
-    75%, 100% {
-      transform: translate(-50%, -50%) scale(2);
-      opacity: 0;
-    }
-  }
-
-  /* Chart canvas styling */
-  canvas {
-    border-radius: 0.5rem;
-  }
-
-  /* Loading states */
-  .skeleton {
-    @apply animate-pulse bg-muted rounded;
-  }
-
-  /* Focus states */
-  .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
-  }
-
-  /* Interactive elements */
-  .interactive {
-    @apply transition-all duration-200 ease-in-out;
-  }
-
-  .interactive:hover {
-    @apply scale-105;
-  }
-
-  .interactive:active {
-    @apply scale-95;
-  }
-
-  /* Gradient overlays */
-  .gradient-overlay {
-    background: linear-gradient(135deg, 
-      hsl(var(--tiktok-primary) / 0.1) 0%, 
-      hsl(var(--tiktok-secondary) / 0.1) 100%);
-  }
-
-  /* Status badge variants */
-  .badge-running {
-    @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
-  }
-
-  .badge-paused {
-    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
-  }
-
-  .badge-stopped {
-    @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
-  }
-
-  .badge-idle {
-    @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200;
-  }
-
-  .sidebar {
-    background: linear-gradient(135deg, #161616 0%, #000000 100%);
-    color: #fff;
-  }
-
-  .card, .bg-card, [data-radix-collection-item] {
-    background: hsl(var(--card)) !important;
-    color: hsl(var(--card-foreground)) !important;
-    border: 1px solid hsl(var(--border)) !important;
-  }
-
-  /* Button gradients for TikTok brand */
-  .bg-gradient-to-r.from-tiktok-primary.to-tiktok-secondary {
-    background: linear-gradient(90deg, #FF0050 0%, #25F4EE 100%) !important;
-    color: #fff !important;
+    @apply bg-background text-foreground;
+    font-family: system-ui, sans-serif;
   }
 }
 
-/* Component-specific styles */
-.metric-card {
-  @apply bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow;
+/* Basic component styles */
+.sidebar {
+  background: #000000;
+  color: #fff;
 }
 
-.activity-item {
-  @apply flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors;
+.card {
+  background: #1A1A1A;
+  color: #fff;
+  border: 1px solid #333;
 }
 
-.chart-container {
-  @apply relative w-full h-64 bg-gradient-to-br from-muted/30 to-muted/10 rounded-lg overflow-hidden;
+.user-profile {
+  background: #1A1A1A;
+  border: 1px solid #333;
 }
 
-/* Responsive design helpers */
+.status-badge {
+  background: #1A1A1A;
+  color: #fff;
+  border: 1px solid #333;
+}
+
+/* Basic responsive design */
 @media (max-width: 768px) {
   .sidebar {
-    @apply w-16;
+    width: 4rem;
   }
   
-  .sidebar .sidebar-text {
-    @apply hidden;
-  }
-}
-
-/* Dark mode specific adjustments */
-.dark .gradient-border {
-  border: 1px solid hsl(var(--border));
-}
-
-.dark .glass-effect {
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
+  .sidebar-text {
+    display: none;
   }
 }
