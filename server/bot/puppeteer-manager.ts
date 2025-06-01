@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 import puppeteer, { Browser, Page, LaunchOptions } from 'puppeteer';
+=======
+import puppeteer, { Browser, Page } from 'puppeteer';
+import { existsSync } from 'fs';
+>>>>>>> e5ae5d93dc75b181d5ae0b5ec1b47f2eba392c0a
 import puppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { storage } from '../storage';
@@ -62,8 +67,19 @@ export class PuppeteerManager {
         }
       }
 
+<<<<<<< HEAD
       const launchOptions: LaunchOptions = {
         headless: true,
+=======
+      const envPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+      const executablePath = envPath && existsSync(envPath)
+        ? envPath
+        : puppeteer.executablePath();
+
+      this.browser = await puppeteerExtra.launch({
+        headless: true, // Force headless for Replit
+        executablePath,
+>>>>>>> e5ae5d93dc75b181d5ae0b5ec1b47f2eba392c0a
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
@@ -107,9 +123,15 @@ export class PuppeteerManager {
       await storage.logActivity({
         type: 'system',
         description: 'Browser initialized successfully',
+<<<<<<< HEAD
         metadata: { 
           headless: true,
           executablePath: executablePath || 'default'
+=======
+        metadata: {
+          headless: process.env.PUPPETEER_HEADLESS !== 'false',
+          executablePath,
+>>>>>>> e5ae5d93dc75b181d5ae0b5ec1b47f2eba392c0a
         },
       });
     } catch (error) {
