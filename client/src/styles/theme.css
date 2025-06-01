@@ -21,11 +21,12 @@
   --bg-sidebar: var(--ocean-gradient);
   --bg-main: var(--ocean-gradient-light);
   
-  /* Text Colors */
-  --text-primary: #2C3E50;
-  --text-secondary: #6C757D;
+/* Text Colors */
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a5568;
   --text-light: #FFFFFF;
-  --text-muted: #ADB5BD;
+  --text-muted: #718096;
+  --text-accent: #4A90E2;
   
   /* Accent Colors */
   --success: #28A745;
@@ -88,9 +89,46 @@ main {
   transform: translateY(-2px);
 }
 
-/* Force light theme for all card components */
+/* Force light theme for all components */
+[class*="card"],
+[class*="text-"],
+[class*="heading-"],
+[class*="title-"],
+[class*="label-"],
+[class*="description-"] {
+  color: var(--text-primary) !important;
+}
+
+/* Specific text color overrides */
+.text-muted-foreground {
+  color: var(--text-secondary) !important;
+}
+
+.text-accent {
+  color: var(--text-accent) !important;
+}
+
+/* Card backgrounds */
 [class*="card"] {
   background: var(--bg-card) !important;
+}
+
+/* Metric values */
+[class*="metric-value"],
+[class*="stat-value"],
+[class*="number"] {
+  color: var(--text-primary) !important;
+  font-weight: 600;
+}
+
+/* Metric labels */
+[class*="metric-label"],
+[class*="stat-label"] {
+  color: var(--text-secondary) !important;
+}
+
+/* Status text */
+[class*="status-text"] {
   color: var(--text-primary) !important;
 }
 
