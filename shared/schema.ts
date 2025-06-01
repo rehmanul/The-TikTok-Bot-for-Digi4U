@@ -47,6 +47,8 @@ export const botConfig = pgTable("bot_config", {
   dailyLimit: integer("daily_limit").default(500),
   actionDelay: integer("action_delay").default(45000), // in milliseconds
   categories: text("categories").array().default([]),
+  subCategories: text("sub_categories").array().default([]),
+  productNames: text("product_names").array().default([]),
   isActive: boolean("is_active").default(false),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

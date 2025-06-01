@@ -149,6 +149,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         dailyLimit: z.number().min(1).max(10000).optional(),
         actionDelay: z.number().min(1000).max(300000).optional(),
         categories: z.array(z.string()).optional(),
+        subCategories: z.array(z.string()).optional(),
+        productNames: z.array(z.string()).optional(),
         isActive: z.boolean().optional(),
       });
 
