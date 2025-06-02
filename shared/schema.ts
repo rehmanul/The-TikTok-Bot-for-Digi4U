@@ -17,6 +17,10 @@ export const botSessions = pgTable("bot_sessions", {
   successfulInvites: integer("successful_invites").default(0),
   errorCount: integer("error_count").default(0),
   settings: jsonb("settings"),
+<<<<<<< HEAD
+=======
+  metadata: jsonb("metadata").default({}),
+>>>>>>> 2ddf01c (Initial commit)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -27,6 +31,10 @@ export const creators = pgTable("creators", {
   category: text("category"),
   lastInvited: timestamp("last_invited"),
   inviteStatus: text("invite_status").default("pending"), // pending, sent, accepted, rejected
+<<<<<<< HEAD
+=======
+  metadata: jsonb("metadata").default({}),
+>>>>>>> 2ddf01c (Initial commit)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -34,7 +42,11 @@ export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
   type: text("type").notNull(), // invite_sent, invite_accepted, error, session_start, etc.
   description: text("description").notNull(),
+<<<<<<< HEAD
   metadata: jsonb("metadata").default(null),
+=======
+  metadata: jsonb("metadata").default({}),
+>>>>>>> 2ddf01c (Initial commit)
   sessionId: integer("session_id").references(() => botSessions.id),
   creatorId: integer("creator_id").references(() => creators.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -117,3 +129,62 @@ export type DashboardMetrics = {
     target: number;
   };
 };
+<<<<<<< HEAD
+=======
+
+// Type for session metadata
+export type SessionMetadata = {
+  userAgent?: string;
+  viewport?: string;
+  sessionType?: string;
+  pauseTime?: string;
+  resumeTime?: string;
+  stopReason?: string;
+  sessionDuration?: number;
+  finalStats?: {
+    invitesSent: number;
+    successfulInvites: number;
+    errorCount: number;
+  };
+  timeSinceStart?: number;
+  error?: string;
+  timestamp?: string;
+};
+
+// Type for creator metadata
+export type CreatorMetadata = {
+  inviteTime?: string;
+  sessionId?: number;
+  lastInteraction?: string;
+  interactionHistory?: Array<{
+    type: string;
+    timestamp: string;
+    sessionId: number;
+  }>;
+};
+
+// Type for activity metadata
+export type ActivityMetadata = {
+  error?: string;
+  timing?: {
+    inviteTime?: string;
+    timeSinceLastAction?: number;
+  };
+  stats?: {
+    invitesSent: number;
+    successfulInvites: number;
+    errorCount: number;
+  };
+  config?: any;
+  enhanced?: boolean;
+  count?: number;
+  limit?: number;
+  sent?: number;
+  username?: string;
+  followers?: number;
+  category?: string;
+  sessionDuration?: number;
+  reason?: string;
+  timestamp?: string;
+};
+>>>>>>> 2ddf01c (Initial commit)
