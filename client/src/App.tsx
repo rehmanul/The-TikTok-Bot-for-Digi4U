@@ -10,6 +10,7 @@ import NotFound from '@/pages/not-found';
 import Creators from '@/pages/creators';
 import Analytics from '@/pages/analytics';
 import Logs from '@/pages/logs';
+import TikTokAPI from '@/pages/tiktok-api';
 import { Sidebar } from '@/components/sidebar';
 
 // Import the new theme

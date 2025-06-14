@@ -83,10 +83,10 @@ export class TikTokSessionManager {
     // Create new session
     this.currentSession = await storage.createBotSession({
       status: 'running',
-      invited_count: 0,
-      success_count: 0,
-      error_count: 0,
-      started_at: new Date(),
+      invitesSent: 0,
+      successfulInvites: 0,
+      errorCount: 0,
+      startTime: new Date(),
       metadata: {
         apiMode: 'official',
         timestamp: new Date().toISOString()
@@ -121,17 +121,17 @@ export class TikTokSessionManager {
 
     await storage.updateBotSession(this.currentSession.id, {
       status: 'stopped',
-      ended_at: new Date(),
+      endTime: new Date(),
       metadata: {
         ...this.currentSession.metadata,
         stopReason: reason,
-        sessionDuration: Date.now() - this.currentSession.started_at.getTime()
+        sessionDuration: Date.now() - (this.currentSession.startTime?.getTime() || Date.now())
       }
     });
 
     await this.activityLogger.logBotAction('session_stopped', this.currentSession.id, undefined, {
       reason,
-      duration: Date.now() - this.currentSession.started_at.getTime()
+      duration: Date.now() - (this.currentSession.startTime?.getTime() || Date.now())
     });
 
     this.currentSession = null;

@@ -2,10 +2,12 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { SessionManager } from "./bot/session-manager";
+import TikTokSessionManager from "./services/tiktok-session-manager";
 import { ActivityLogger } from "./bot/activity-logger";
 import { z } from "zod";
 
 const sessionManager = new SessionManager();
+const tikTokSessionManager = new TikTokSessionManager();
 const activityLogger = new ActivityLogger();
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -322,6 +324,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ 
         message: "Failed to fetch user data",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // TikTok API OAuth endpoints
+  app.get("/api/tiktok/auth-url", async (req: Request, res: Response) => {
+    try {
+      const authUrl = tikTokSessionManager.generateAuthUrl();
+      res.json({ authUrl });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to generate auth URL",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.post("/api/tiktok/oauth/callback", async (req: Request, res: Response) => {
+    try {
+      const { code } = req.body;
+      if (!code) {
+        return res.status(400).json({ message: "Authorization code is required" });
+      }
+
+      const accessToken = await tikTokSessionManager.handleOAuthCallback(code);
+      res.json({ 
+        success: true, 
+        message: "TikTok API connected successfully",
+        hasToken: !!accessToken
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "OAuth callback failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get("/api/tiktok/validate", async (req: Request, res: Response) => {
+    try {
+      const isValid = await tikTokSessionManager.validateConnection();
+      res.json({ valid: isValid });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Validation failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get("/api/tiktok/invitation-history", async (req: Request, res: Response) => {
+    try {
+      const history = await tikTokSessionManager.getInvitationHistory();
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to fetch invitation history",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get("/api/tiktok/metrics", async (req: Request, res: Response) => {
+    try {
+      const metrics = await tikTokSessionManager.getCampaignMetrics();
+      res.json(metrics || {});
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to fetch campaign metrics",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Enhanced bot start with API mode selection
+  app.post("/api/bot/start-api", async (req: Request, res: Response) => {
+    try {
+      const session = await tikTokSessionManager.startSession();
+      res.json({ 
+        success: true, 
+        session,
+        mode: 'api',
+        message: 'Bot started using TikTok Official API'
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to start API session",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.post("/api/bot/stop-api", async (req: Request, res: Response) => {
+    try {
+      await tikTokSessionManager.stopSession('manual');
+      res.json({ 
+        success: true,
+        message: 'API session stopped successfully'
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to stop API session",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
