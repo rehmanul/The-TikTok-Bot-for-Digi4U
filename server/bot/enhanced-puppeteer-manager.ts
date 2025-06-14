@@ -33,12 +33,16 @@ export class EnhancedPuppeteerManager {
           '--window-size=1920,1080',
           '--disable-background-timer-throttling',
           '--disable-backgrounding-occluded-windows',
-          '--disable-renderer-backgrounding'
+          '--disable-renderer-backgrounding',
+          '--disable-features=VizDisplayCompositor',
+          '--disable-software-rasterizer',
+          '--single-process'
         ],
         defaultViewport: {
           width: 1920,
           height: 1080
-        }
+        },
+        executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium-browser'
       };
 
       this.browser = await puppeteerExtra.launch(launchOptions);

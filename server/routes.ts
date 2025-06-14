@@ -316,8 +316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({
         name: 'Digi4U Repair',
-        email: user.email,
-        imageUrl: user.imageUrl,
+        email: 'rehman.sho@gmail.com',
         role: 'Administrator'
       });
     } catch (error) {
