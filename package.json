@@ -81,6 +81,7 @@
     "react-resizable-panels": "^2.1.9",
     "recharts": "^2.15.3",
     "tailwind-merge": "^2.6.0",
+    "tailwindcss": "^4.1.10",
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.20.3",
     "tw-animate-css": "^1.3.2",
