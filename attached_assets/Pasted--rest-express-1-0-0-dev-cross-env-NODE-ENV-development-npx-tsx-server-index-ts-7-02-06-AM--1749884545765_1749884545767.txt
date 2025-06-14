@@ -1,0 +1,67 @@
+
+> rest-express@1.0.0 dev
+> cross-env NODE_ENV=development npx tsx server/index.ts
+
+7:02:06 AM [express] serving on localhost:5000
+Unhandled Rejection at: Promise {
+  <rejected> [Failed to load PostCSS config: Failed to load PostCSS config (searchPath: /home/runner/workspace/client): [Error] Loading PostCSS Plugin failed: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+  
+  (@/home/runner/workspace/postcss.config.js)
+  Error: Loading PostCSS Plugin failed: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+  
+  (@/home/runner/workspace/postcss.config.js)
+      at load (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33632:11)
+      at <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33657:16)
+      at Array.map (<anonymous>)
+      at plugins (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33656:8)
+      at processResult (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33726:14)
+      at <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33856:14)]
+} reason: [Failed to load PostCSS config: Failed to load PostCSS config (searchPath: /home/runner/workspace/client): [Error] Loading PostCSS Plugin failed: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+
+(@/home/runner/workspace/postcss.config.js)
+Error: Loading PostCSS Plugin failed: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+
+(@/home/runner/workspace/postcss.config.js)
+    at load (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33632:11)
+    at <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33657:16)
+    at Array.map (<anonymous>)
+    at plugins (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33656:8)
+    at processResult (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33726:14)
+    at <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33856:14)]
+Unhandled Rejection at: Promise {
+  <rejected> [Failed to load PostCSS config: Failed to load PostCSS config (searchPath: /home/runner/workspace/client): [Error] Loading PostCSS Plugin failed: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+  
+  (@/home/runner/workspace/postcss.config.js)
+  Error: Loading PostCSS Plugin failed: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+  
+  (@/home/runner/workspace/postcss.config.js)
+      at load (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33632:11)
+      at <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33657:16)
+      at Array.map (<anonymous>)
+      at plugins (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33656:8)
+      at processResult (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33726:14)
+      at <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33856:14)]
+} reason: [Failed to load PostCSS config: Failed to load PostCSS config (searchPath: /home/runner/workspace/client): [Error] Loading PostCSS Plugin failed: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+
+(@/home/runner/workspace/postcss.config.js)
+Error: Loading PostCSS Plugin failed: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+
+(@/home/runner/workspace/postcss.config.js)
+    at load (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33632:11)
+    at <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33657:16)
+    at Array.map (<anonymous>)
+    at plugins (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33656:8)
+    at processResult (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33726:14)
+    at <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33856:14)]
+7:02:09 AM [vite] Pre-transform error: Failed to load PostCSS config (searchPath: /home/runner/workspace/client): [Error] Loading PostCSS Plugin failed: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+
+(@/home/runner/workspace/postcss.config.js)
+Error: Loading PostCSS Plugin failed: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+
+(@/home/runner/workspace/postcss.config.js)
+    at load (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33632:11)
+    at <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33657:16)
+    at Array.map (<anonymous>)
+    at plugins (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33656:8)
+    at processResult (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33726:14)
+    at <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:33856:14)
