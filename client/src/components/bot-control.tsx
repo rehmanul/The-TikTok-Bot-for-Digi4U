@@ -8,12 +8,13 @@ import { useBotStatus, useStartBot, usePauseBot, useResumeBot, useStopBot, useEm
 import { useDashboardMetrics } from '@/hooks/use-metrics';
 import { useToast } from '@/hooks/use-toast';
 import { Play, Pause, Square, AlertTriangle, Loader2 } from 'lucide-react';
+import { Rocket } from 'lucide-react';
 
 export function BotControl() {
   const { toast } = useToast();
   const { data: botStatus } = useBotStatus();
   const { data: metrics } = useDashboardMetrics();
-  
+
   const startBot = useStartBot();
   const pauseBot = usePauseBot();
   const resumeBot = useResumeBot();
@@ -309,21 +310,21 @@ export function BotControl() {
                     }
                   </span>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Duration</span>
                   <span className="text-sm font-medium">
                     {botStatus.metrics.uptime}
                   </span>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Invites Sent</span>
                   <span className="text-sm font-medium text-green-600">
                     {botStatus.currentSession.invitesSent || 0}
                   </span>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Success Rate</span>
                   <span className="text-sm font-medium text-green-600">
@@ -352,21 +353,21 @@ export function BotControl() {
             {/* System Status */}
             <div className="pt-4 border-t border-border space-y-2">
               <h4 className="text-sm font-semibold">System Status</h4>
-              
+
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">TikTok Session</span>
                 <Badge variant={botStatus?.session?.puppeteer?.isLoggedIn ? 'default' : 'secondary'} className="text-xs">
                   {botStatus?.session?.puppeteer?.isLoggedIn ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
-              
+
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Browser</span>
                 <Badge variant={botStatus?.session?.puppeteer?.isInitialized ? 'default' : 'secondary'} className="text-xs">
                   {botStatus?.session?.puppeteer?.isInitialized ? 'Ready' : 'Not Ready'}
                 </Badge>
               </div>
-              
+
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Bot Engine</span>
                 <Badge variant={botStatus?.session?.isRunning ? 'default' : 'secondary'} className="text-xs">

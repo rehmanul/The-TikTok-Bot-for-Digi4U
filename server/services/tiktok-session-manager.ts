@@ -149,11 +149,11 @@ export class TikTokSessionManager {
     while (this.isRunning && !this.shouldStop && this.currentSession) {
       try {
         await this.processCreatorBatch(config);
-        
+
         // Respect rate limits and delays
         const delay = config.action_delay || 30000;
         await this.sleep(delay);
-        
+
         // Check daily limits
         if (this.currentSession.invited_count >= config.daily_limit) {
           await this.stopSession('daily_limit_reached');
@@ -162,7 +162,7 @@ export class TikTokSessionManager {
       } catch (error) {
         console.error('Invitation loop error:', error);
         await this.activityLogger.logError(error as Error, 'invitation_loop');
-        
+
         // Continue after error with exponential backoff
         await this.sleep(60000);
       }
@@ -184,7 +184,7 @@ export class TikTokSessionManager {
       };
 
       const apiCreators = await this.apiService.searchCreators(searchParams);
-      
+
       await this.activityLogger.logBotAction('creators_found', this.currentSession?.id, undefined, {
         count: apiCreators.length,
         searchParams
@@ -225,7 +225,7 @@ export class TikTokSessionManager {
 
         // Send invitation using API
         await this.sendInvitationToCreator(creator, apiCreator.id);
-        
+
         // Update session stats
         if (this.currentSession) {
           await storage.updateBotSession(this.currentSession.id, {

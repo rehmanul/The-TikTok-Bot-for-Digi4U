@@ -30,6 +30,7 @@ export function Sidebar() {
     { path: '/settings', label: 'Bot Settings', icon: Settings },
     { path: '/creators', label: 'Creators', icon: Users },
     { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+    { path: '/tiktok-api', label: 'TikTok API', icon: Rocket },
     { path: '/logs', label: 'Activity Logs', icon: ScrollText },
   ];
 
