@@ -30,6 +30,7 @@ function App() {
                   <Switch>
                     <Route path="/" component={Dashboard} />
                     <Route path="/dashboard" component={Dashboard} />
+                    <Route path="/tiktok-api" component={TikTokAPI} />
                     <Route path="/settings" component={Settings} />
                     <Route path="/creators" component={Creators} />
                     <Route path="/analytics" component={Analytics} />
