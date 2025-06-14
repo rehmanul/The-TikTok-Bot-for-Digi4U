@@ -1,81 +1,114 @@
-# The TikTok Affiliator Bot for Digi4U 🇬🇧
+# TikTok Affiliate Bot for Digi4U
 
-A custom web automation solution developed for **Digi4U** (UK) to automate the affiliate creator invitation process on **TikTok Shop**. This bot programmatically creates invitation links, selects influencers, and invites them based on criteria like follower count and GMV, using stealth browsing automation.
+A sophisticated web automation application for automating TikTok affiliate creator invitations. Built with React, Express.js, and Puppeteer for reliable, production-ready automation.
 
----
+## Features
 
-## 🎯 Use Case
+- **Automated Creator Discovery**: Finds and filters TikTok creators based on follower count and categories
+- **Smart Invitation System**: Sends invitations with human-like delays to avoid detection
+- **Real-time Dashboard**: Monitor bot performance, success rates, and activity logs
+- **Advanced Filtering**: Filter creators by followers, categories, and invitation history
+- **Security First**: Rate limiting, helmet security headers, and CORS protection
+- **Database Persistence**: PostgreSQL storage for all data and session management
 
-> Automate creator outreach for TikTok affiliate campaigns to reduce manual workload and increase campaign velocity for Digi4U’s UK market.
+## Quick Start
 
----
+### Prerequisites
 
-## 🛠 Features
+- Node.js 20+
+- PostgreSQL database
+- TikTok Seller account credentials
 
-- ✅ Create multiple **TikTok affiliate invitation links** (e.g., "Promotion Product 1", "Promotion Product 1-6")
-- ✅ Add product, set commission (10%), and configure expiration (1 month)
-- ✅ Invite up to **50 creators per link**
-- ✅ Automatically **select invitation category** and **follower ranges**
-- ✅ Avoid re-inviting creators previously invited
-- ✅ Uses stealth Puppeteer + rotating selection
-- ✅ Stops when GMV (gross merchandise volume) criteria is hit
-- ✅ CLI and Web interface (React + Tailwind + Vite)
+### Installation
 
----
+1. Clone the repository
+2. Copy `.env.example` to `.env` and configure your settings:
+   ```bash
+   cp .env.example .env
+   ```
 
-## ⚙️ Setup Instructions
+3. Set up your environment variables:
+   ```env
+   DATABASE_URL=your_postgresql_connection_string
+   TIKTOK_EMAIL=your_tiktok_email
+   TIKTOK_PASSWORD=your_tiktok_password
+   ```
 
-### 1. Clone & Install
+4. Install dependencies and initialize database:
+   ```bash
+   npm install
+   npm run db:push
+   ```
 
-```bash
-git clone https://github.com/rehmanul/The-TikTok-Bot-for-Digi4U.git
-cd The-TikTok-Bot-for-Digi4U
-npm install
-pip install -r requirements.txt  # If backend Python exists
+5. Start the application:
+   ```bash
+   npm run dev
+   ```
 
-# Initialize database tables
-npm run db:push
-```
+## Production Deployment
 
-### 2. Configure Environment
+### Environment Configuration
 
-Create a `.env` file in the project root with your credentials:
+Required environment variables for production:
 
-```env
-PORT=5000
-DATABASE_URL=postgres://user:password@host:5432/database
-TIKTOK_EMAIL=your-email@example.com
-TIKTOK_PASSWORD=your-password
-SESSION_SECRET=replace-with-random-string
-```
+- `DATABASE_URL`: PostgreSQL connection string
+- `TIKTOK_EMAIL`: TikTok Seller account email
+- `TIKTOK_PASSWORD`: TikTok Seller account password
+- `NODE_ENV=production`
+- `SESSION_SECRET`: Random string for session encryption
 
-### 3. Run in Development
+### Security Features
 
-Start the Express API and Vite client together:
+- **Helmet**: Security headers including CSP, HSTS, and XSS protection
+- **Rate Limiting**: API rate limiting (100 req/15min) and bot action limiting (10 req/min)
+- **CORS**: Configured for production domains
+- **Input Validation**: Zod schema validation for all API endpoints
+- **Error Handling**: Comprehensive error logging and user-friendly error responses
 
-```bash
-npm run dev
-```
+### Performance Optimizations
 
-### 4. Build for Production
+- **Connection Pooling**: PostgreSQL connection pooling
+- **Request Logging**: Structured API request logging
+- **Body Size Limits**: 10MB request body limit protection
+- **Database Indexing**: Optimized database queries with proper indexing
 
-Compile the client and server bundles:
+## API Endpoints
 
-```bash
-npm run build
-```
+### Bot Control
+- `GET /api/bot/status` - Get current bot status
+- `POST /api/bot/start` - Start bot session
+- `POST /api/bot/pause` - Pause current session
+- `POST /api/bot/stop` - Stop current session
 
-### 5. Start in Production
+### Configuration
+- `GET /api/bot/config` - Get bot configuration
+- `PUT /api/bot/config` - Update bot settings
 
-After building, launch the bot with:
+### Analytics
+- `GET /api/dashboard/metrics` - Dashboard metrics
+- `GET /api/activities` - Activity logs
+- `GET /api/creators/stats` - Creator statistics
 
-```bash
-npm run start
-```
+## Security Best Practices
 
-### 6. Deploy
+1. **Environment Variables**: Never commit sensitive credentials
+2. **Rate Limiting**: Built-in protection against abuse
+3. **Input Validation**: All inputs validated with Zod schemas
+4. **Security Headers**: Comprehensive security header configuration
+5. **Error Handling**: Secure error responses without information leakage
 
-The repository includes a `render.yaml` file for deployment to
-[Render](https://render.com). Create a new Web Service from this repo and
-provide the same environment variables configured above. Render will run the
-build and start commands automatically.
+## Architecture
+
+- **Frontend**: React 18 with TypeScript, Wouter routing, TanStack Query
+- **Backend**: Express.js with TypeScript, Drizzle ORM
+- **Database**: PostgreSQL with connection pooling
+- **Automation**: Puppeteer with stealth plugins
+- **Security**: Helmet, CORS, rate limiting, input validation
+
+## Support
+
+For issues or questions, please contact the development team.
+
+## License
+
+Proprietary software for Digi4U (UK) Ltd.
