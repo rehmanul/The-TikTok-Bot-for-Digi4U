@@ -17,6 +17,8 @@ import {
   type BotStatus,
   type DashboardMetrics
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User management
@@ -393,4 +395,208 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database Storage implementation
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async createBotSession(session: InsertBotSession): Promise<BotSession> {
+    const [newSession] = await db
+      .insert(botSessions)
+      .values(session)
+      .returning();
+    return newSession;
+  }
+
+  async updateBotSession(id: number, updates: Partial<BotSession>): Promise<BotSession | undefined> {
+    const [session] = await db
+      .update(botSessions)
+      .set(updates)
+      .where(eq(botSessions.id, id))
+      .returning();
+    return session || undefined;
+  }
+
+  async getCurrentSession(): Promise<BotSession | undefined> {
+    const [session] = await db
+      .select()
+      .from(botSessions)
+      .orderBy(desc(botSessions.createdAt))
+      .limit(1);
+    return session || undefined;
+  }
+
+  async getRecentSessions(limit = 10): Promise<BotSession[]> {
+    return await db
+      .select()
+      .from(botSessions)
+      .orderBy(desc(botSessions.createdAt))
+      .limit(limit);
+  }
+
+  async createCreator(creator: InsertCreator): Promise<Creator> {
+    const [newCreator] = await db
+      .insert(creators)
+      .values(creator)
+      .returning();
+    return newCreator;
+  }
+
+  async updateCreator(id: number, updates: Partial<Creator>): Promise<Creator | undefined> {
+    const [creator] = await db
+      .update(creators)
+      .set(updates)
+      .where(eq(creators.id, id))
+      .returning();
+    return creator || undefined;
+  }
+
+  async getCreatorByUsername(username: string): Promise<Creator | undefined> {
+    const [creator] = await db
+      .select()
+      .from(creators)
+      .where(eq(creators.username, username));
+    return creator || undefined;
+  }
+
+  async getCreatorsForInvitation(limit: number): Promise<Creator[]> {
+    return await db
+      .select()
+      .from(creators)
+      .where(eq(creators.inviteStatus, 'pending'))
+      .limit(limit);
+  }
+
+  async getCreatorStats(): Promise<{ total: number; active: number; pending: number }> {
+    const [stats] = await db
+      .select({
+        total: sql<number>`count(*)::int`,
+        active: sql<number>`count(case when invite_status = 'accepted' then 1 end)::int`,
+        pending: sql<number>`count(case when invite_status = 'pending' then 1 end)::int`,
+      })
+      .from(creators);
+    
+    return stats || { total: 0, active: 0, pending: 0 };
+  }
+
+  async logActivity(activity: InsertActivity): Promise<Activity> {
+    const [newActivity] = await db
+      .insert(activities)
+      .values(activity)
+      .returning();
+    return newActivity;
+  }
+
+  async getRecentActivities(limit = 50): Promise<Activity[]> {
+    return await db
+      .select()
+      .from(activities)
+      .orderBy(desc(activities.createdAt))
+      .limit(limit);
+  }
+
+  async getActivitiesBySession(sessionId: number): Promise<Activity[]> {
+    return await db
+      .select()
+      .from(activities)
+      .where(eq(activities.sessionId, sessionId))
+      .orderBy(desc(activities.createdAt));
+  }
+
+  async getBotConfig(): Promise<BotConfig | undefined> {
+    const [config] = await db
+      .select()
+      .from(botConfig)
+      .limit(1);
+    return config || undefined;
+  }
+
+  async updateBotConfig(config: Partial<BotConfig>): Promise<BotConfig> {
+    const existingConfig = await this.getBotConfig();
+    
+    if (existingConfig) {
+      const [updated] = await db
+        .update(botConfig)
+        .set({ ...config, updatedAt: new Date() })
+        .where(eq(botConfig.id, existingConfig.id))
+        .returning();
+      return updated;
+    } else {
+      const [newConfig] = await db
+        .insert(botConfig)
+        .values(config)
+        .returning();
+      return newConfig;
+    }
+  }
+
+  async getDashboardMetrics(): Promise<DashboardMetrics> {
+    const recentActivities = await this.getRecentActivities(100);
+    const invitesSent = recentActivities.filter(a => a.type === 'invite_sent').length;
+    const acceptedInvites = recentActivities.filter(a => a.type === 'invite_accepted').length;
+    const creatorStats = await this.getCreatorStats();
+    
+    return {
+      invitesSent,
+      acceptanceRate: invitesSent > 0 ? (acceptedInvites / invitesSent) * 100 : 0,
+      activeCreators: creatorStats.active,
+      estimatedRevenue: acceptedInvites * 50, // $50 per accepted invite
+      dailyProgress: {
+        current: invitesSent,
+        target: 500,
+      },
+    };
+  }
+
+  async getBotStatus(): Promise<BotStatus> {
+    const currentSession = await this.getCurrentSession();
+    const recentActivities = await this.getRecentActivities(100);
+    const todayInvites = recentActivities.filter(a => 
+      a.type === 'invite_sent' && 
+      a.createdAt && 
+      new Date(a.createdAt).toDateString() === new Date().toDateString()
+    ).length;
+    
+    const acceptedInvites = recentActivities.filter(a => a.type === 'invite_accepted').length;
+    const creatorStats = await this.getCreatorStats();
+    
+    return {
+      status: currentSession?.status || 'idle',
+      currentSession,
+      metrics: {
+        todayInvites,
+        successRate: todayInvites > 0 ? (acceptedInvites / todayInvites) * 100 : 0,
+        activeCreators: creatorStats.active,
+        uptime: currentSession?.startTime ? 
+          Math.floor((Date.now() - new Date(currentSession.startTime).getTime()) / 1000 / 60) + 'm' : 
+          '0m',
+      },
+    };
+  }
+}
+
+export const storage = new DatabaseStorage();
