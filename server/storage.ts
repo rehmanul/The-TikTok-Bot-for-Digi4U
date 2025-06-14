@@ -87,9 +87,7 @@ export class MemStorage implements IStorage {
     const defaultUser: User = {
       id: 1,
       username: 'digi4u_admin',
-      email: 'rehman.sho@gmail.com',
-      imageUrl: null,
-      createdAt: new Date(),
+      password: 'admin123',
     };
     this.users.set(1, defaultUser);
   }
@@ -140,6 +138,7 @@ export class MemStorage implements IStorage {
         category: creator.category,
         lastInvited: null,
         inviteStatus: null,
+        metadata: {},
         createdAt: new Date(),
       };
       this.creators.set(id, creatorData);
@@ -210,6 +209,7 @@ export class MemStorage implements IStorage {
       successfulInvites: insertSession.successfulInvites || 0,
       errorCount: insertSession.errorCount || 0,
       settings: insertSession.settings || null,
+      metadata: {},
       createdAt: new Date(),
     };
     this.botSessions.set(id, session);
@@ -247,6 +247,7 @@ export class MemStorage implements IStorage {
       category: insertCreator.category || null,
       lastInvited: insertCreator.lastInvited || null,
       inviteStatus: insertCreator.inviteStatus || null,
+      metadata: {},
       createdAt: new Date(),
     };
     this.creators.set(id, creator);

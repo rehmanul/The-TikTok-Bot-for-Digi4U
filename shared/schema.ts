@@ -28,10 +28,7 @@ export const creators = pgTable("creators", {
   category: text("category"),
   lastInvited: timestamp("last_invited"),
   inviteStatus: text("invite_status").default("pending"), // pending, sent, accepted, rejected
-<<<<<<< HEAD
-=======
   metadata: jsonb("metadata").default({}),
->>>>>>> 2ddf01c (Initial commit)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -39,11 +36,7 @@ export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
   type: text("type").notNull(), // invite_sent, invite_accepted, error, session_start, etc.
   description: text("description").notNull(),
-<<<<<<< HEAD
-  metadata: jsonb("metadata").default(null),
-=======
   metadata: jsonb("metadata").default({}),
->>>>>>> 2ddf01c (Initial commit)
   sessionId: integer("session_id").references(() => botSessions.id),
   creatorId: integer("creator_id").references(() => creators.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -126,8 +119,6 @@ export type DashboardMetrics = {
     target: number;
   };
 };
-<<<<<<< HEAD
-=======
 
 // Type for session metadata
 export type SessionMetadata = {
@@ -184,4 +175,3 @@ export type ActivityMetadata = {
   reason?: string;
   timestamp?: string;
 };
->>>>>>> 2ddf01c (Initial commit)
