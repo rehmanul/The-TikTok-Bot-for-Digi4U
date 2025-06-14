@@ -101,7 +101,6 @@ export class MemStorage implements IStorage {
       maxFollowers: 1000000,
       dailyLimit: 500,
       actionDelay: 45000,
-<<<<<<< HEAD
       categories: [
         'REPAIR PARTS',
         'TABLET PARTS', 
@@ -111,11 +110,8 @@ export class MemStorage implements IStorage {
         'BUSSINESS PARTNERS',
         'CONTACT'
       ],
-=======
-      categories: ['Beauty', 'Fashion', 'Lifestyle', 'Fitness'],
       subCategories: [],
       productNames: [],
->>>>>>> 1d752cceabe930f461c9545f6a781cfd037e21c5
       isActive: false,
       updatedAt: new Date(),
     };

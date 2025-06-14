@@ -17,10 +17,7 @@ export const botSessions = pgTable("bot_sessions", {
   successfulInvites: integer("successful_invites").default(0),
   errorCount: integer("error_count").default(0),
   settings: jsonb("settings"),
-<<<<<<< HEAD
-=======
   metadata: jsonb("metadata").default({}),
->>>>>>> 2ddf01c (Initial commit)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
