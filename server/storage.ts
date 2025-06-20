@@ -555,10 +555,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDashboardMetrics(): Promise<DashboardMetrics> {
-    const recentActivities = await this.getRecentActivities(100);
-    const invitesSent = recentActivities.filter(a => a.type === 'invite_sent').length;
-    const acceptedInvites = recentActivities.filter(a => a.type === 'invite_accepted').length;
-    const creatorStats = await this.getCreatorStats();
+    // Use parallel queries for better performance
+    const [inviteStats, creatorStats] = await Promise.all([
+      db.select({
+        invitesSent: sql<number>`count(case when type = 'invite_sent' then 1 end)::int`,
+        acceptedInvites: sql<number>`count(case when type = 'invite_accepted' then 1 end)::int`,
+      }).from(activities),
+      this.getCreatorStats()
+    ]);
+
+    const { invitesSent, acceptedInvites } = inviteStats[0];
     
     return {
       invitesSent,
@@ -573,16 +579,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBotStatus(): Promise<BotStatus> {
-    const currentSession = await this.getCurrentSession();
-    const recentActivities = await this.getRecentActivities(100);
-    const todayInvites = recentActivities.filter(a => 
-      a.type === 'invite_sent' && 
-      a.createdAt && 
-      new Date(a.createdAt).toDateString() === new Date().toDateString()
-    ).length;
-    
-    const acceptedInvites = recentActivities.filter(a => a.type === 'invite_accepted').length;
-    const creatorStats = await this.getCreatorStats();
+    // Use parallel queries for better performance
+    const [currentSession, inviteStats, creatorStats] = await Promise.all([
+      this.getCurrentSession(),
+      db.select({
+        todayInvites: sql<number>`count(case when type = 'invite_sent' and date(created_at) = current_date then 1 end)::int`,
+        acceptedInvites: sql<number>`count(case when type = 'invite_accepted' then 1 end)::int`,
+      }).from(activities),
+      this.getCreatorStats()
+    ]);
+
+    const { todayInvites, acceptedInvites } = inviteStats[0];
     
     return {
       status: currentSession?.status || 'idle',
