@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useBotStatus } from '@/hooks/use-bot-status';
 import { useTheme } from './theme-provider';
-import { UserProfile } from './user-profile';
+
 import { 
   LayoutDashboard, 
   Settings, 
@@ -79,7 +79,7 @@ export function Sidebar() {
             </div>
           </div>
         </div>
-        <UserProfile />
+
       </div>
 
       {/* Bot Status */}
