@@ -27,6 +27,7 @@ export function Sidebar() {
 
   const navigationItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/real-bot', label: 'Real Bot', icon: Rocket },
     { path: '/guide', label: 'Operation Guide', icon: Wrench },
     { path: '/help', label: 'Help & Support', icon: Play },
     { path: '/settings', label: 'Bot Settings', icon: Settings },

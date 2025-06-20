@@ -14,6 +14,7 @@ import TikTokAPI from '@/pages/tiktok-api';
 import Guide from '@/pages/guide';
 import Help from '@/pages/help';
 import OAuthCallback from '@/pages/oauth-callback';
+import RealBot from '@/pages/real-bot';
 import { Sidebar } from '@/components/sidebar';
 
 // Import the new theme
@@ -37,6 +38,7 @@ function App() {
                     <Route path="/help" component={Help} />
                     <Route path="/oauth-callback" component={OAuthCallback} />
                     <Route path="/tiktok-api" component={TikTokAPI} />
+                    <Route path="/real-bot" component={RealBot} />
                     <Route path="/settings" component={Settings} />
                     <Route path="/creators" component={Creators} />
                     <Route path="/analytics" component={Analytics} />

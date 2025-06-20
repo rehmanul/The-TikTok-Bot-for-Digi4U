@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { SessionManager } from "./bot/session-manager";
 import TikTokSessionManager from "./services/tiktok-session-manager";
 import { ActivityLogger } from "./bot/activity-logger";
+import { workingBot } from "./bot/working-bot";
 import { z } from "zod";
 
 const sessionManager = new SessionManager();
@@ -38,6 +39,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ 
         message: "Failed to fetch bot status",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Real working bot routes
+  app.post('/api/bot/start-real', async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ 
+          message: "Email and password are required for TikTok login" 
+        });
+      }
+
+      const result = await workingBot.startBot({ email, password });
+      
+      await activityLogger.logBotAction('real_bot_started', result.sessionId, undefined, {
+        success: result.success,
+        timestamp: new Date().toISOString()
+      });
+
+      res.json({
+        success: result.success,
+        sessionId: result.sessionId,
+        message: result.success 
+          ? "Real TikTok bot started successfully! It will now begin finding and inviting creators automatically."
+          : "Failed to start bot. Check your TikTok credentials."
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to start real bot",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.post('/api/bot/stop-real', async (req: Request, res: Response) => {
+    try {
+      await workingBot.stopBot();
+      
+      await activityLogger.logBotAction('real_bot_stopped', undefined, undefined, {
+        reason: 'user_requested',
+        timestamp: new Date().toISOString()
+      });
+
+      res.json({
+        success: true,
+        message: "Real TikTok bot stopped successfully"
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to stop real bot",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get('/api/bot/status-real', async (req: Request, res: Response) => {
+    try {
+      const status = await workingBot.getStatus();
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to get real bot status",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
