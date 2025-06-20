@@ -365,9 +365,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // TikTok API OAuth endpoints
   app.get("/api/tiktok/auth-url", async (req: Request, res: Response) => {
     try {
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const baseUrl = process.env.REPL_URL || `${req.protocol}://${req.get('host')}`;
       const redirectUri = `${baseUrl}/oauth-callback`;
-      const authUrl = `https://business-api.tiktok.com/portal/auth?app_id=${process.env.TIKTOK_APP_ID}&state=auth_request&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      const appId = process.env.TIKTOK_APP_ID || '7512649815700963329';
+      const authUrl = `https://business-api.tiktok.com/portal/auth?app_id=${appId}&state=auth_request&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user.info.basic,business.get`;
       res.json({ authUrl });
     } catch (error) {
       res.status(500).json({ 
@@ -430,8 +431,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          app_id: '7512649815700963329',
-          secret: 'e448a875d92832486230db13be28db0444035303',
+          app_id: process.env.TIKTOK_APP_ID || '7512649815700963329',
+          secret: process.env.TIKTOK_APP_SECRET || 'e448a875d92832486230db13be28db0444035303',
           auth_code: code,
           grant_type: 'authorization_code'
         })
