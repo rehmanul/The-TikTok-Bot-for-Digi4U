@@ -28,7 +28,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light">
+      <ThemeProvider defaultTheme="dark">
         <div className="min-h-screen flex">
           <Route path="/login" component={Login} />
           <Route path="*">
@@ -42,9 +42,9 @@ function App() {
                   <div className="flex-1 flex flex-col overflow-hidden">
                     {/* Mobile Header */}
                     {isMobile && (
-                      <header className="h-16 bg-background border-b border-border flex items-center justify-between px-4 lg:hidden">
+                      <header className="h-16 bg-gradient-to-r from-blue-50 to-slate-50 dark:from-slate-900 dark:to-black border-b border-border flex items-center justify-between px-4 lg:hidden">
                         <MobileMenuButton onClick={() => setSidebarOpen(true)} />
-                        <h1 className="text-lg font-semibold">TikTok Bot</h1>
+                        <h1 className="text-lg font-semibold text-slate-800 dark:text-slate-200">TikTok Bot</h1>
                         <div className="w-10" /> {/* Spacer for centering */}
                       </header>
                     )}

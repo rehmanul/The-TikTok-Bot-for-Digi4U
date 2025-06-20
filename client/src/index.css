@@ -1,84 +1,83 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 0 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 330 100% 50%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 330 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 0 100% 50%;
-    --chart-1: 0 100% 50%;
-    --chart-2: 330 100% 50%;
-    --chart-3: 195 100% 50%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --tiktok-red: 0 100% 50%;
-    --tiktok-pink: 330 100% 50%;
-    --tiktok-cyan: 195 100% 50%;
-    --tiktok-black: 240 10% 3.9%;
+    /* Light theme - Ocean Blue inspired */
+    --background: 210 100% 97%;
+    --foreground: 220 25% 15%;
+    --card: 210 100% 98%;
+    --card-foreground: 220 25% 15%;
+    --popover: 210 100% 98%;
+    --popover-foreground: 220 25% 15%;
+    --primary: 200 98% 39%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 92%;
+    --secondary-foreground: 220 25% 15%;
+    --muted: 210 40% 92%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 92%;
+    --accent-foreground: 220 25% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 200 98% 39%;
     --radius: 0.75rem;
+    --chart-1: 200 98% 39%;
+    --chart-2: 190 85% 45%;
+    --chart-3: 210 75% 35%;
+    --chart-4: 180 65% 50%;
+    --chart-5: 220 70% 45%;
   }
 
   .dark {
-    --background: 20 14.3% 4.1%;
-    --foreground: 0 0% 95%;
-    --card: 24 9.8% 10%;
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 0 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 330 100% 50%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 330 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 346.8 77.2% 49.8%;
-    --chart-1: 346.8 77.2% 49.8%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Dark theme - Deep Ocean Blue + Black Wave */
+    --background: 220 45% 8%;
+    --foreground: 210 40% 95%;
+    --card: 220 40% 10%;
+    --card-foreground: 210 40% 95%;
+    --popover: 220 40% 10%;
+    --popover-foreground: 210 40% 95%;
+    --primary: 200 100% 60%;
+    --primary-foreground: 220 45% 8%;
+    --secondary: 220 35% 15%;
+    --secondary-foreground: 210 40% 90%;
+    --muted: 220 35% 15%;
+    --muted-foreground: 215 20% 70%;
+    --accent: 220 35% 18%;
+    --accent-foreground: 210 40% 90%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 210 40% 95%;
+    --border: 220 35% 20%;
+    --input: 220 35% 18%;
+    --ring: 200 100% 60%;
+    --chart-1: 200 100% 60%;
+    --chart-2: 190 85% 65%;
+    --chart-3: 210 75% 55%;
+    --chart-4: 180 70% 60%;
+    --chart-5: 220 80% 65%;
   }
 
   * {
-    border-color: hsl(var(--border));
+    @apply border-border;
   }
-
+  
   body {
-    background: linear-gradient(135deg, #ff0050 0%, #ff4068 25%, #ff0050 50%, #25f4ee 75%, #ff0050 100%);
-    background-size: 400% 400%;
-    animation: tiktokGradient 8s ease-in-out infinite;
-    color: hsl(var(--foreground));
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    min-height: 100vh;
+    @apply bg-background text-foreground transition-colors duration-300;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(14, 116, 189, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(30, 64, 175, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
   }
-
-  @keyframes tiktokGradient {
-    0% { background-position: 0% 50%; }
-    25% { background-position: 100% 50%; }
-    50% { background-position: 100% 100%; }
-    75% { background-position: 0% 100%; }
-    100% { background-position: 0% 50%; }
+  
+  .dark body {
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(14, 116, 189, 0.25) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(30, 64, 175, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(15, 23, 42, 0.9) 50%, rgba(0, 0, 0, 0.95) 100%);
   }
 }
 
