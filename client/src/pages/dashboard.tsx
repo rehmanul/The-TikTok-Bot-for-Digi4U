@@ -36,17 +36,17 @@ export default function Dashboard() {
   return (
     <div className="flex-1 flex flex-col bg-background">
       {/* Header */}
-      <header className="h-20 bg-gradient-to-r from-primary/5 to-pink-50 dark:from-primary/10 dark:to-pink-950/20 border-b border-border/50 flex items-center justify-between px-8">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-            <BarChart3 className="w-6 h-6 text-primary" />
+      <header className="h-16 lg:h-20 bg-gradient-to-r from-primary/5 to-pink-50 dark:from-primary/10 dark:to-pink-950/20 border-b border-border/50 flex items-center justify-between px-4 lg:px-8">
+        <div className="flex items-center space-x-3 lg:space-x-4">
+          <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+            <BarChart3 className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">TikTok Affiliate Bot</h2>
-            <p className="text-sm text-muted-foreground">Monitor and control your automation</p>
+          <div className="hidden sm:block">
+            <h2 className="text-lg lg:text-2xl font-bold text-foreground">TikTok Affiliate Bot</h2>
+            <p className="text-xs lg:text-sm text-muted-foreground">Monitor and control your automation</p>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 lg:space-x-4">
           <Badge variant="outline" className="text-xs bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
             <Activity className="w-3 h-3 mr-1 text-green-600 dark:text-green-400" />
             Live Updates

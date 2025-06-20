@@ -79,10 +79,10 @@ export default function Logs() {
   return (
     <div className="flex-1 flex flex-col">
       {/* Header */}
-      <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
+      <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Activity Logs</h2>
-          <p className="text-sm text-muted-foreground">Monitor bot activities and system events</p>
+          <h2 className="text-lg lg:text-xl font-semibold text-foreground">Activity Logs</h2>
+          <p className="text-xs lg:text-sm text-muted-foreground hidden sm:block">Monitor bot activities and system events</p>
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm">
@@ -101,9 +101,9 @@ export default function Logs() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 p-6 overflow-auto space-y-6">
+      <main className="flex-1 p-4 lg:p-6 overflow-auto space-y-4 lg:space-y-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
@@ -159,7 +159,7 @@ export default function Logs() {
             <CardTitle>Activity Log</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />

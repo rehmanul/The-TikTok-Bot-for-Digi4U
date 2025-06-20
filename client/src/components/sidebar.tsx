@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useBotStatus } from '@/hooks/use-bot-status';
 import { useTheme } from './theme-provider';
+import { useMobile } from '@/hooks/use-mobile';
 
 import { 
   LayoutDashboard, 
@@ -17,13 +18,21 @@ import {
   Sun, 
   Play, 
   Pause,
-  Wrench 
+  Wrench,
+  Menu,
+  X
 } from 'lucide-react';
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [location] = useLocation();
   const { theme, setTheme } = useTheme();
   const { data: botStatus } = useBotStatus();
+  const isMobile = useMobile();
 
   const navigationItems = [
     // Main sections
@@ -63,27 +72,54 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="sidebar w-64 flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 border-r border-border/20">
+    <>
+      {/* Mobile Overlay */}
+      {isMobile && isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <aside className={`
+        sidebar flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 border-r border-border/20
+        ${isMobile ? 'fixed top-0 left-0 z-50 w-80 transition-transform duration-300' : 'w-64'}
+        ${isMobile && !isOpen ? '-translate-x-full' : 'translate-x-0'}
+      `}>
       {/* Header */}
-      <div className="p-6 border-b border-border/20">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary to-pink-500 flex items-center justify-center shadow-lg">
-            <Rocket className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">TikTok Bot</h1>
-            <div className="flex items-center">
-              <span className="text-sm text-white/70">v2.0</span>
-              <span className="mx-2 text-white/40">|</span>
-              <span className="text-sm text-white/70">Digi4u</span>
+      <div className="p-4 lg:p-6 border-b border-border/20">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-r from-primary to-pink-500 flex items-center justify-center shadow-lg">
+              <Rocket className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+            </div>
+            <div className="hidden sm:block">
+              <h1 className="text-base lg:text-lg font-bold text-white">TikTok Bot</h1>
+              <div className="flex items-center">
+                <span className="text-xs lg:text-sm text-white/70">v2.0</span>
+                <span className="mx-2 text-white/40">|</span>
+                <span className="text-xs lg:text-sm text-white/70">Digi4u</span>
+              </div>
             </div>
           </div>
+          
+          {/* Mobile Close Button */}
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="text-white hover:bg-white/10 lg:hidden"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          )}
         </div>
-
       </div>
 
       {/* Bot Status */}
-      <div className="p-6 border-b border-border/20">
+      <div className="p-4 lg:p-6 border-b border-border/20">
         <div className="p-4 bg-black/20 rounded-xl border border-white/10">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-white">Bot Status</span>
@@ -115,7 +151,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-6">
+      <nav className="flex-1 p-4 lg:p-6 overflow-y-auto">
         <div className="space-y-6">
           {/* Main Section */}
           <div className="space-y-2">
@@ -217,17 +253,32 @@ export function Sidebar() {
       </nav>
 
       {/* Theme Toggle */}
-      <div className="p-6 border-t border-border/20">
+      <div className="p-4 lg:p-6 border-t border-border/20">
         <Button
           variant="outline"
           size="sm"
           onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          className="w-full justify-start space-x-3 text-white/70 hover:text-white hover:bg-white/10 border-white/20"
+          className="w-full justify-start space-x-2 lg:space-x-3 text-white/70 hover:text-white hover:bg-white/10 border-white/20 text-sm lg:text-base"
         >
           {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+          <span className="truncate">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
         </Button>
       </div>
-    </aside>
+      </aside>
+    </>
+  );
+}
+
+// Mobile Menu Button Component
+export function MobileMenuButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onClick}
+      className="lg:hidden text-foreground hover:bg-accent"
+    >
+      <Menu className="w-5 h-5" />
+    </Button>
   );
 }
