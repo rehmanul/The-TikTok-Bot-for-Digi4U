@@ -70,7 +70,14 @@ export default function Creators() {
       {/* Header */}
       <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6">
         <div>
-          <h2 className="text-lg lg:text-xl font-semibold text-foreground">Creators</h2>
+          <div className="flex items-center space-x-2">
+            <h2 className="text-lg lg:text-xl font-semibold text-foreground">Creators</h2>
+            <HelpTooltip 
+              content="View and manage your TikTok creator database. Track invitation status, filter by category, and discover new partnership opportunities."
+              variant="info"
+              side="bottom"
+            />
+          </div>
           <p className="text-xs lg:text-sm text-muted-foreground hidden sm:block">Manage and track your TikTok creator partnerships</p>
         </div>
         <Button size="sm" className="text-sm">
@@ -136,7 +143,14 @@ export default function Creators() {
         {/* Filters */}
         <Card>
           <CardHeader>
-            <CardTitle>Creator Database</CardTitle>
+            <CardTitle className="flex items-center space-x-2">
+              <span>Creator Database</span>
+              <HelpTooltip 
+                content="Browse all discovered creators. Use filters to find creators by category, follower count, or invitation status. Click on creators to view detailed profiles."
+                variant="tip"
+                side="right"
+              />
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
