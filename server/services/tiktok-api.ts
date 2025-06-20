@@ -40,11 +40,11 @@ export class TikTokAPIService {
   private client: AxiosInstance;
   private config: TikTokAPIConfig;
   private activityLogger: ActivityLogger;
-  
+
   constructor(config: TikTokAPIConfig) {
     this.config = config;
     this.activityLogger = new ActivityLogger();
-    
+
     this.client = axios.create({
       baseURL: 'https://business-api.tiktok.com/open_api/v1.3',
       headers: {
@@ -85,13 +85,7 @@ export class TikTokAPIService {
    * Generate OAuth authorization URL for TikTok Business API
    */
   generateAuthUrl(state?: string): string {
-    const params = new URLSearchParams({
-      app_id: this.config.appId,
-      redirect_uri: this.config.redirectUri,
-      state: state || 'auth_state'
-    });
-
-    return `https://business-api.tiktok.com/portal/auth?${params.toString()}`;
+    return 'https://www.tiktok.com/v2/auth/authorize?client_key=7512649815700963329&scope=user.info.basic%2Cbiz.creator.info%2Cbiz.creator.insights%2Cvideo.list%2Ctcm.order.update%2Ctto.campaign.link&response_type=code&redirect_uri=https%3A%2F%2Fseller-uk-accounts.tiktok.com%2Faccount%2Fregister';
   }
 
   /**
@@ -109,12 +103,12 @@ export class TikTokAPIService {
         const accessToken = response.data.data.access_token;
         this.config.accessToken = accessToken;
         this.client.defaults.headers['Access-Token'] = accessToken;
-        
+
         await this.activityLogger.logBotAction('oauth_token_obtained', undefined, undefined, {
           success: true,
           expires_in: response.data.data.expires_in
         });
-        
+
         return accessToken;
       } else {
         throw new Error(`Failed to obtain access token: ${response.data.message}`);
