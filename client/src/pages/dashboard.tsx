@@ -34,16 +34,21 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col bg-background">
       {/* Header */}
-      <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">Dashboard</h2>
-          <p className="text-sm text-muted-foreground">Monitor your TikTok affiliate automation</p>
+      <header className="h-20 bg-gradient-to-r from-primary/5 to-pink-50 dark:from-primary/10 dark:to-pink-950/20 border-b border-border/50 flex items-center justify-between px-8">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+            <BarChart3 className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">TikTok Affiliate Bot</h2>
+            <p className="text-sm text-muted-foreground">Monitor and control your automation</p>
+          </div>
         </div>
         <div className="flex items-center space-x-4">
-          <Badge variant="outline" className="text-xs">
-            <Activity className="w-3 h-3 mr-1" />
+          <Badge variant="outline" className="text-xs bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
+            <Activity className="w-3 h-3 mr-1 text-green-600 dark:text-green-400" />
             Live Updates
           </Badge>
           <Button
@@ -59,7 +64,7 @@ export default function Dashboard() {
       </header>
 
       {/* Dashboard Content */}
-      <main className="flex-1 p-6 overflow-auto space-y-8">
+      <main className="flex-1 p-8 overflow-auto space-y-8">
         {/* Metrics Cards */}
         <section>
           <MetricsCards />
@@ -71,14 +76,14 @@ export default function Dashboard() {
         </section>
 
         {/* Analytics and Activity */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {/* Analytics Chart */}
-          <div>
+          <div className="space-y-6">
             <AnalyticsChart />
           </div>
 
           {/* Activity Feed */}
-          <div>
+          <div className="space-y-6">
             <ActivityFeed />
           </div>
         </section>

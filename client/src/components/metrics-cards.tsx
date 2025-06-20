@@ -39,7 +39,8 @@ export function MetricsCards() {
       title: 'Invites Sent Today',
       value: metrics.invitesSent.toLocaleString(),
       icon: Send,
-      color: 'from-blue-500 to-blue-600',
+      color: 'from-primary to-pink-500',
+      bgColor: 'bg-primary/10',
       change: '+12%',
       trend: 'up' as const,
     },
@@ -47,7 +48,8 @@ export function MetricsCards() {
       title: 'Acceptance Rate',
       value: `${metrics.acceptanceRate}%`,
       icon: CheckCircle,
-      color: 'from-green-500 to-green-600',
+      color: 'from-green-500 to-emerald-500',
+      bgColor: 'bg-green-500/10',
       change: '+8%',
       trend: 'up' as const,
     },
@@ -55,7 +57,8 @@ export function MetricsCards() {
       title: 'Active Creators',
       value: metrics.activeCreators.toLocaleString(),
       icon: Users,
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-purple-500 to-violet-500',
+      bgColor: 'bg-purple-500/10',
       change: '+15%',
       trend: 'up' as const,
     },
@@ -63,7 +66,8 @@ export function MetricsCards() {
       title: 'Est. Monthly Revenue',
       value: `$${metrics.estimatedRevenue.toLocaleString()}`,
       icon: DollarSign,
-      color: 'from-orange-500 to-orange-600',
+      color: 'from-orange-500 to-amber-500',
+      bgColor: 'bg-orange-500/10',
       change: '+22%',
       trend: 'up' as const,
     },
@@ -76,11 +80,11 @@ export function MetricsCards() {
         const TrendIcon = card.trend === 'up' ? TrendingUp : TrendingDown;
         
         return (
-          <Card key={index} className="relative overflow-hidden border-border shadow-sm hover:shadow-md transition-shadow">
+          <Card key={index} className="relative overflow-hidden border-border/50 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/20 bg-gradient-to-br from-card to-card/50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center`}>
-                  <Icon className="w-6 h-6 text-white" />
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${card.color} flex items-center justify-center shadow-lg`}>
+                  <Icon className="w-7 h-7 text-white" />
                 </div>
                 <Badge 
                   variant="secondary" 
