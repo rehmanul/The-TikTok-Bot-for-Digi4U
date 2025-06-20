@@ -1,0 +1,275 @@
+# TikTok Affiliate Invitation Bot - Technical Specification
+
+## Project Overview
+**Client:** Digi4u Repair UK  
+**Objective:** Develop an automated bot to systematically invite TikTok affiliates/creators to promote client products through targeted collaboration invitations.
+
+## Core Functionality Requirements
+
+### 1. Authentication & Session Management
+- **Primary Function:** Automated login session management for TikTok UK Seller Shop
+- **Login Endpoint:** https://seller-uk-accounts.tiktok.com/account/login
+- **Session Handling:**
+  - Check for existing valid login sessions on startup
+  - If no session exists, display "Connect to Digi4u TikTok Seller Page" button
+  - Maintain persistent session storage with automatic refresh capabilities
+  - Handle session expiry and re-authentication seamlessly
+
+### 2. Creator Discovery & Filtering System
+- **Base URL:** https://affiliate.tiktok.com/connection/creator?shop_region=GB
+- **Navigation Path:** Find creators → Filter By → Creators → Product category → Follower count
+- **Required Filtering Capabilities:**
+  - **Follower Count Range:** Configurable min/max thresholds
+  - **Product Category:** Dynamic category selection based on client products
+  - **Promotion Type:** Video promotions, Live stream promotions, or both
+  - **GMV Ranking:** Sort creators by Gross Merchandise Value (highest to lowest)
+
+### 3. Intelligent Invitation System
+- **Target Identification:** Automated parsing of creator profiles meeting filter criteria
+- **GMV-Based Stopping Mechanism:**
+  - Process creators in descending GMV order
+  - Configurable GMV threshold for stopping invitations
+  - Smart queue management to avoid duplicate invitations
+- **Invitation Delivery:**
+  - Automated collaboration invite generation and sending
+  - Rate limiting to comply with TikTok's API restrictions
+  - Error handling for failed invitations with retry logic
+
+### 4. Automated Campaign Management
+- **Invite Count Control:** Pre-set invitation targets with automatic execution
+- **Campaign Monitoring:**
+  - Real-time progress tracking
+  - Success/failure rate monitoring
+  - Creator response tracking
+- **Dynamic Link Generation:** Auto-generate collaboration invitation links based on campaign parameters
+
+## Technical Requirements
+
+### 5. Architecture Specifications
+- **Framework:** Web-based application with headless browser automation
+- **Browser Engine:** Chromium-based for TikTok compatibility
+- **Session Management:** Secure cookie and token storage
+- **Database:** Creator tracking, campaign history, and performance metrics
+- **API Integration:** TikTok Business API compliance where applicable
+
+### 6. User Interface Requirements
+- **Dashboard Features:**
+  - Campaign creation and management interface
+  - Real-time invitation progress monitoring
+  - Creator database with filtering capabilities
+  - GMV threshold configuration panel
+  - Invitation count setting and tracking
+- **Authentication Interface:**
+  - Secure TikTok login integration
+  - Session status indicators
+  - Manual re-authentication options
+
+### 7. Safety & Compliance Features
+- **Rate Limiting:** Respect TikTok's invitation frequency limits
+- **Anti-Detection:** Human-like interaction patterns and timing
+- **Error Recovery:** Automatic retry mechanisms for failed operations
+- **Compliance Monitoring:** TikTok Terms of Service adherence
+- **Data Privacy:** Secure handling of authentication credentials
+
+## Operational Parameters
+
+### 8. Configuration Settings
+- **Creator Filters:**
+  - Minimum follower count: [Configurable]
+  - Maximum follower count: [Configurable]
+  - Product categories: [Multi-select]
+  - Geographic targeting: UK-focused
+- **GMV Thresholds:**
+  - Minimum acceptable GMV: [Configurable]
+  - Maximum processing range: [Configurable]
+- **Invitation Limits:**
+  - Daily invitation quota: [Configurable]
+  - Campaign invitation targets: [Configurable]
+  - Concurrent processing limits: [Configurable]
+
+### 9. Reporting & Analytics
+- **Campaign Reports:**
+  - Invitation success rates
+  - Creator response rates
+  - GMV distribution of targeted creators
+  - Category-wise performance metrics
+- **Export Capabilities:**
+  - CSV export of creator databases
+  - Campaign performance reports
+  - ROI tracking and analysis
+
+## Deliverables
+
+### 10. Final Product Components
+1. **Core Bot Application:** Fully functional automation system
+2. **User Dashboard:** Web-based control interface
+3. **Configuration Panel:** Campaign and filter management
+4. **Documentation:** User manual and technical documentation
+5. **Testing Suite:** Comprehensive testing protocols
+6. **Deployment Package:** Ready-to-deploy solution
+
+### 11. Success Metrics
+- **Automation Efficiency:** 95%+ successful invitation delivery rate
+- **Targeting Accuracy:** Precise creator filtering based on set criteria
+- **Session Reliability:** 99%+ uptime with automatic session management
+- **Compliance Score:** 100% adherence to TikTok platform policies
+
+
+---
+Official API:App ID
+7512649815700963329
+Secret
+e448a875d92832486230db13be28db0444035303
+Reset
+Advertiser authorization URL
+https://business-api.tiktok.com/portal/auth?app_id=7512649815700963329&state=your_custom_params&redirect_uri=https%3A%2F%2Faffiliate.tiktok.com%2Fconnection%2Fcreator%3Fshop_region%3DGB%26is_new_user%3D0%26is_new_connect%3D0
+Advertiser redirect URLs
+https://affiliate.tiktok.com/connection/creator?shop_region=GB&is_new_user=0&is_new_connect=0
+TikTok account holder authorization URL
+https://www.tiktok.com/v2/auth/authorize?client_key=7512649815700963329&scope=user.info.basic%2Cbiz.creator.info%2Cbiz.creator.insights%2Cvideo.list%2Ctcm.order.update%2Ctto.campaign.link&response_type=code&redirect_uri=https%3A%2F%2Fseller-uk-accounts.tiktok.com%2Faccount%2Fregister
+TikTok account holder redirect URLs
+https://seller-uk-accounts.tiktok.com/account/register
+Authorization
+API rate limiting
+Your API rate limit changes have been approved
+Advanced
+Scope of permission
+Enter an API name or path
+Ad Account Management
+Ads Management
+Audience Management
+All
+Reporting
+Measurement
+Creative Management
+App Management
+Pixel Management
+DPA Catalog Management
+Reach & Frequency
+All
+Lead Management
+TikTok Creator Marketplace (TCM)
+All
+TikTok Creator
+All
+Ad Comments
+TikTok Business Plugin
+Automated Rules
+All
+TikTok Accounts
+Onsite Commerce Store
+Offline Events Management
+Ad Diagnosis
+Mentions
+CRM Event Management
+All
+Business Recommendation
+CTX Events Management
+Brand Safety
+Ad Account Management
+Ad Account Management
+v1.3
+API
+/advertiser/info/
+/oauth2/advertiser/get/
+/term/get/
+/term/check/
+/term/confirm/
+/pangle_block_list/get/
+/pangle_block_list/update/
+/pangle_block_list/campaign/update/
+/pangle_block_list/campaign/get/
+/pangle_audience_package/get/
+/bc/inspiration_tool/audience_insight/
+/bc/inspiration_tool/ad_performance/
+/bc/get/
+/bc/balance/get/
+/bc/transaction/get/
+/bc/image/upload/
+/bc/advertiser/create/
+/advertiser/update/
+/bc/advertiser/disable/
+/bc/advertiser/qualification/get/
+/bc/advertiser/attribute/
+/bc/advertiser/unionpay_info/check/
+/bc/advertiser/unionpay_info/submit/
+/bc/transfer/
+/advertiser/balance/get/
+/advertiser/transaction/get/
+/bc/account/transaction/get/
+/bc/account/cost/get/
+/bc/account/budget/changelog/get/
+/bc/asset/get/
+/bc/asset/admin/get/
+/bc/asset/assign/
+/bc/asset/unassign/
+/bc/asset/partner/get/
+/bc/asset/member/get/
+/bc/asset/admin/delete/
+/bc/pixel/link/update/
+/bc/pixel/link/get/
+/bc/pixel/transfer/
+/asset/bind/quota/
+/bc/pixel/get/
+/bc/partner/asset/get/
+/bc/partner/delete/
+/bc/partner/add/
+/bc/partner/get/
+/bc/partner/asset/delete/
+/bc/member/delete/
+/bc/member/update/
+/bc/member/get/
+/bc/member/invite/
+/bc/member/assign/
+/bc/billing_group/update/
+/bc/billing_group/get/
+/bc/billing_group/create/
+/bc/billing_group/advertiser/list/
+/bc/invoice/task/create/
+/bc/invoice/get/
+/bc/invoice/download/
+/bc/invoice/task/get/
+/bc/invoice/unpaid/get/
+/bc/invoice/task/list/
+/bc/invoice/billing_report/get/
+/bc/asset_group/create/
+/bc/asset_group/get/
+/bc/asset_group/update/
+/bc/asset_group/list/
+/bc/asset_group/delete/
+/bc/child/invite/
+/bc/child/unbind/
+Sandbox Ad Account
+Create a Sandbox Ad Account
+A sandbox ad account creates an environment for you to test your ad. In the sandbox environment, all information is completely isolated from the formal environment. You can make various marketing API calls at ease. Any changes made in the sandbox environment will not affect the real online account, ads in the sandbox environment will not be delivered, clicked, or charged.
+We have provided you with a sandbox environment in which the main domain requested by all interfaces is "https://sandbox-ads.tiktok.com/open_api/" (Production environment is: https://business-api.tiktok.com/open_api/).
+
+Database:Connections
+Hostname
+An internal hostname used by your Render services.
+
+dpg-d0t3rlili9vc739k84gg-a
+
+Port
+5432
+
+Database
+dg4u_tiktok_bot
+
+Username
+yang
+
+Password
+nNTm6Q4un1aF25fmVvl7YqSzWffyznIe
+
+
+Internal Database URL
+postgresql://yang:nNTm6Q4un1aF25fmVvl7YqSzWffyznIe@dpg-d0t3rlili9vc739k84gg-a/dg4u_tiktok_bot
+
+
+External Database URL
+postgresql://yang:nNTm6Q4un1aF25fmVvl7YqSzWffyznIe@dpg-d0t3rlili9vc739k84gg-a.oregon-postgres.render.com/dg4u_tiktok_bot
+
+
+PSQL Command
+PGPASSWORD=nNTm6Q4un1aF25fmVvl7YqSzWffyznIe psql -h dpg-d0t3rlili9vc739k84gg-a.oregon-postgres.render.com -U yang dg4u_tiktok_bot
