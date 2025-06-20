@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
 import { 
   Play, 
   Square, 
@@ -20,6 +19,17 @@ import {
   Zap
 } from 'lucide-react';
 
+interface BotStatus {
+  isRunning: boolean;
+  status: string;
+  sessionId: number | null;
+  stats?: {
+    invitesSent: number;
+    successfulInvites: number;
+    uptime: string;
+  };
+}
+
 export default function RealBot() {
   const [credentials, setCredentials] = useState({
     email: '',
@@ -29,7 +39,7 @@ export default function RealBot() {
   const queryClient = useQueryClient();
 
   // Query bot status
-  const { data: botStatus, isLoading: statusLoading } = useQuery({
+  const { data: botStatus, isLoading: statusLoading } = useQuery<BotStatus>({
     queryKey: ['/api/bot/status-real'],
     refetchInterval: 3000, // Refresh every 3 seconds
   });
@@ -37,13 +47,14 @@ export default function RealBot() {
   // Start bot mutation
   const startBotMutation = useMutation({
     mutationFn: async (creds: { email: string; password: string }) => {
-      return apiRequest('/api/bot/start-real', {
+      const response = await fetch('/api/bot/start-real', {
         method: 'POST',
         body: JSON.stringify(creds),
         headers: { 'Content-Type': 'application/json' }
       });
+      return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       if (data.success) {
         toast({
           title: "Bot Started Successfully!",
@@ -71,9 +82,10 @@ export default function RealBot() {
   // Stop bot mutation
   const stopBotMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/bot/stop-real', {
+      const response = await fetch('/api/bot/stop-real', {
         method: 'POST'
       });
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -131,6 +143,12 @@ export default function RealBot() {
     }
   };
 
+  // Safe access to bot status with fallbacks
+  const status = botStatus?.status || 'idle';
+  const isRunning = botStatus?.isRunning || false;
+  const sessionId = botStatus?.sessionId || null;
+  const stats = botStatus?.stats;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-red-200 dark:border-gray-700 sticky top-0 z-10">
@@ -161,27 +179,27 @@ export default function RealBot() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <span className="font-medium text-lg">
-                  {botStatus?.isRunning ? 'Active & Running' : 'Stopped'}
+                  {isRunning ? 'Active & Running' : 'Stopped'}
                 </span>
-                {getStatusBadge(botStatus?.status || 'idle')}
+                {getStatusBadge(status)}
               </div>
               <div className="text-sm text-gray-500">
-                Session ID: {botStatus?.sessionId || 'None'}
+                Session ID: {sessionId || 'None'}
               </div>
             </div>
 
-            {botStatus?.stats && (
+            {stats && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div className="text-center p-4 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-lg">
-                  <div className="text-2xl font-bold text-red-600">{botStatus.stats.invitesSent}</div>
+                  <div className="text-2xl font-bold text-red-600">{stats.invitesSent}</div>
                   <div className="text-sm text-gray-600 dark:text-gray-300">Invites Sent</div>
                 </div>
                 <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{botStatus.stats.successfulInvites}</div>
+                  <div className="text-2xl font-bold text-green-600">{stats.successfulInvites}</div>
                   <div className="text-sm text-gray-600 dark:text-gray-300">Successful</div>
                 </div>
                 <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{botStatus.stats.uptime}</div>
+                  <div className="text-2xl font-bold text-blue-600">{stats.uptime}</div>
                   <div className="text-sm text-gray-600 dark:text-gray-300">Uptime</div>
                 </div>
               </div>
@@ -193,7 +211,7 @@ export default function RealBot() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Start Bot Card */}
-          {!botStatus?.isRunning && (
+          {!isRunning && (
             <Card className="tiktok-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -253,7 +271,7 @@ export default function RealBot() {
           )}
 
           {/* Stop Bot Card */}
-          {botStatus?.isRunning && (
+          {isRunning && (
             <Card className="tiktok-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
