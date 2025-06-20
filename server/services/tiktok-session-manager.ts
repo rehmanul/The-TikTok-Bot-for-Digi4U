@@ -343,6 +343,151 @@ export class TikTokSessionManager {
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+
+  /**
+   * Start API session for automated operations
+   */
+  async startAPISession(): Promise<void> {
+    if (!this.apiService.isConnected) {
+      throw new Error('TikTok API is not connected');
+    }
+
+    this.isSessionRunning = true;
+    await this.activityLogger.logBotAction('api_session_started', undefined, undefined, {
+      timestamp: new Date().toISOString()
+    });
+
+    // Start periodic creator discovery and invitation
+    this.startPeriodicOperations();
+  }
+
+  /**
+   * Stop API session
+   */
+  async stopAPISession(): Promise<void> {
+    this.isSessionRunning = false;
+
+    if (this.sessionInterval) {
+      clearInterval(this.sessionInterval);
+      this.sessionInterval = null;
+    }
+
+    await this.activityLogger.logBotAction('api_session_stopped', undefined, undefined, {
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  /**
+   * Check if API session is running
+   */
+  isAPISessionRunning(): boolean {
+    return this.isSessionRunning;
+  }
+
+  /**
+   * Start periodic operations for creator discovery and invitations
+   */
+  private startPeriodicOperations(): void {
+    if (this.sessionInterval) {
+      clearInterval(this.sessionInterval);
+    }
+
+    // Run creator discovery and invitations every 30 minutes
+    this.sessionInterval = setInterval(async () => {
+      if (!this.isSessionRunning) return;
+
+      try {
+        await this.runPeriodicTasks();
+      } catch (error) {
+        console.error('Periodic task error:', error);
+        await this.activityLogger.logError(error as Error, 'periodic_tasks');
+      }
+    }, 30 * 60 * 1000); // 30 minutes
+
+    // Run initial task after 5 seconds
+    setTimeout(async () => {
+      if (this.isSessionRunning) {
+        await this.runPeriodicTasks();
+      }
+    }, 5000);
+  }
+
+  /**
+   * Run periodic tasks for creator discovery and invitations
+   */
+  private async runPeriodicTasks(): Promise<void> {
+    if (!this.apiService || !this.isSessionRunning) return;
+
+    try {
+      // Search for creators
+      const creators = await this.apiService.searchCreators({
+        min_followers: 1000,
+        max_followers: 100000,
+        limit: 10
+      });
+
+      await this.activityLogger.logBotAction('creators_found', undefined, undefined, {
+        count: creators.length,
+        timestamp: new Date().toISOString()
+      });
+
+      // Send invitations to creators
+      for (const creator of creators.slice(0, 5)) { // Limit to 5 invitations per run
+        if (!this.isSessionRunning) break;
+
+        try {
+          const success = await this.apiService.sendInvitation({
+            creator_id: creator.id,
+            message: 'Join our affiliate program and earn commissions promoting our products!'
+          });
+
+          if (success) {
+            this.metrics.total_invitations++;
+            this.metrics.successful_invitations++;
+          } else {
+            this.metrics.total_invitations++;
+            this.metrics.failed_invitations++;
+          }
+        } catch (error) {
+          this.metrics.total_invitations++;
+          this.metrics.failed_invitations++;
+          console.error(`Failed to invite creator ${creator.id}:`, error);
+        }
+
+        // Wait 5 seconds between invitations to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+
+      await this.activityLogger.logBotAction('periodic_invitations_completed', undefined, undefined, {
+        metrics: this.metrics,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Periodic task error:', error);
+      await this.activityLogger.logError(error as Error, 'periodic_tasks');
+    }
+  }
+
+  /**
+   * Get API client configuration
+   */
+  getConfig(): TikTokAPIConfig {
+    return this.apiService ? this.apiService.getConfig() : { appId: '', appSecret: '', redirectUri: '' };
+  }
+
+  private isSessionRunning: boolean = false;
+  private sessionInterval: NodeJS.Timeout | null = null;
+
+  private metrics = {
+    total_invitations: 0,
+    successful_invitations: 0,
+    failed_invitations: 0
+  };
+
+  get isConnected(): boolean {
+        return this.apiService.isConnected;
+  }
 }
 
 export default TikTokSessionManager;

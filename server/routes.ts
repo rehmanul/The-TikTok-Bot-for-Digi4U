@@ -11,7 +11,7 @@ const tikTokSessionManager = new TikTokSessionManager();
 const activityLogger = new ActivityLogger();
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  
+
   // Dashboard metrics endpoint
   app.get("/api/dashboard/metrics", async (req: Request, res: Response) => {
     try {
@@ -30,7 +30,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const status = await storage.getBotStatus();
       const sessionStatus = await sessionManager.getStatus();
-      
+
       res.json({
         ...status,
         session: sessionStatus,
@@ -43,28 +43,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Start bot session
-  app.post("/api/bot/start", async (req: Request, res: Response) => {
+  // Bot control routes
+  app.post('/api/bot/start', async (req, res) => {
     try {
-      if (sessionManager.isSessionRunning()) {
-        return res.status(400).json({ message: "Bot session is already running" });
+      const sessionManager = SessionManager.getInstance();
+      await sessionManager.startSession();
+      res.json({ success: true, message: 'Bot session started successfully' });
+    } catch (error) {
+      await activityLogger.logError(error as Error, 'start_bot_session');
+      res.status(500).json({ 
+        message: 'Failed to start bot session', 
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.post('/api/bot/start-api', async (req, res) => {
+    try {
+      const tiktokManager = TikTokSessionManager.getInstance();
+      const isValid = await tiktokManager.validateConnection();
+
+      if (!isValid) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'TikTok API connection is not valid. Please connect first.' 
+        });
       }
 
-      const session = await sessionManager.startSession();
-      await activityLogger.logUserAction("Started bot session");
-      
-      res.json({ 
-        message: "Bot session started successfully",
-        session 
-      });
+      // Start the API session
+      await tiktokManager.startAPISession();
+      await activityLogger.logBotAction('api_session_started', undefined, undefined, { timestamp: new Date().toISOString() });
+
+      res.json({ success: true, message: 'TikTok API session started successfully' });
     } catch (error) {
-      await activityLogger.logError(
-        error instanceof Error ? error : new Error(String(error)),
-        "Failed to start bot session"
-      );
+      await activityLogger.logError(error as Error, 'start_api_session');
       res.status(500).json({ 
-        message: "Failed to start bot session",
-        error: error instanceof Error ? error.message : "Unknown error"
+        success: false,
+        message: 'Failed to start API session', 
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.post('/api/bot/stop-api', async (req, res) => {
+    try {
+      const tiktokManager = TikTokSessionManager.getInstance();
+      await tiktokManager.stopAPISession();
+      await activityLogger.logBotAction('api_session_stopped', undefined, undefined, { timestamp: new Date().toISOString() });
+
+      res.json({ success: true, message: 'TikTok API session stopped successfully' });
+    } catch (error) {
+      await activityLogger.logError(error as Error, 'stop_api_session');
+      res.status(500).json({ 
+        success: false,
+        message: 'Failed to stop API session', 
+        error: (error as Error).message 
       });
     }
   });
@@ -74,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await sessionManager.pauseSession();
       await activityLogger.logUserAction("Paused bot session");
-      
+
       res.json({ message: "Bot session paused successfully" });
     } catch (error) {
       await activityLogger.logError(
@@ -93,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await sessionManager.resumeSession();
       await activityLogger.logUserAction("Resumed bot session");
-      
+
       res.json({ message: "Bot session resumed successfully" });
     } catch (error) {
       await activityLogger.logError(
@@ -112,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await sessionManager.stopSession("Manual stop requested");
       await activityLogger.logUserAction("Stopped bot session");
-      
+
       res.json({ message: "Bot session stopped successfully" });
     } catch (error) {
       await activityLogger.logError(
@@ -157,7 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const validatedConfig = configSchema.parse(req.body);
-      
+
       // Validate that maxFollowers > minFollowers if both are provided
       if (validatedConfig.minFollowers && validatedConfig.maxFollowers) {
         if (validatedConfig.maxFollowers <= validatedConfig.minFollowers) {
@@ -169,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedConfig = await storage.updateBotConfig(validatedConfig);
       await activityLogger.logUserAction("Updated bot configuration", undefined, validatedConfig);
-      
+
       res.json(updatedConfig);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -178,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           errors: error.errors 
         });
       }
-      
+
       await activityLogger.logError(
         error instanceof Error ? error : new Error(String(error)),
         "Failed to update bot configuration"
@@ -250,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await sessionManager.stopSession("Emergency stop activated");
       await activityLogger.logUserAction("Emergency stop activated");
-      
+
       res.json({ message: "Emergency stop activated successfully" });
     } catch (error) {
       await activityLogger.logError(
@@ -267,19 +300,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check login status endpoint (Test Mode)
   app.post("/api/bot/check-login", async (req: Request, res: Response) => {
     const startTime = Date.now();
-    
+
     try {
       // In test mode, simulate successful login verification
       const elapsedTime = Date.now() - startTime;
-      
+
       // Update the session manager's login status
       sessionManager.setLoginStatus(true);
-      
+
       await activityLogger.logUserAction("TikTok login verified successfully (Test Mode)", undefined, { 
         testMode: true,
         elapsedTime 
       });
-      
+
       res.json({ 
         success: true, 
         isLoggedIn: true,
@@ -288,17 +321,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         elapsedTime,
         message: 'Login verified successfully in test mode'
       });
-      
+
     } catch (error) {
       const elapsedTime = Date.now() - startTime;
       console.error('Login check error:', error);
-      
+
       await activityLogger.logError(
         error instanceof Error ? error : new Error(String(error)),
         "Failed to check login status",
         { elapsedTime }
       );
-      
+
       res.json({ 
         success: false, 
         isLoggedIn: false,
@@ -368,7 +401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tiktok/exchange-code", async (req: Request, res: Response) => {
     try {
       const { authorizationCode } = req.body;
-      
+
       if (!authorizationCode) {
         return res.status(400).json({ 
           success: false,
@@ -409,10 +442,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (tokenData.code === 0 && tokenData.data?.access_token) {
         // Set the access token in the session manager
         tikTokSessionManager.updateAccessToken(tokenData.data.access_token);
-        
+
         // Validate the token
         const isValid = await tikTokSessionManager.validateConnection();
-        
+
         if (isValid) {
           res.json({
             success: true,
@@ -450,10 +483,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Set the access token in the TikTok API service
       tikTokSessionManager.updateAccessToken(access_token);
-      
+
       // Validate the token
       const isValid = await tikTokSessionManager.validateConnection();
-      
+
       if (isValid) {
         res.json({ 
           success: true, 

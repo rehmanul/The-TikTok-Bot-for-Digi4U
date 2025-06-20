@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { 
@@ -21,19 +23,32 @@ import {
   Settings,
   Zap,
   Globe,
-  BarChart3
+  BarChart3,
+  Key,
+  RefreshCw,
+  Play,
+  Pause
 } from 'lucide-react';
 
 interface TikTokValidation {
   valid: boolean;
+  hasToken?: boolean;
+  connected?: boolean;
 }
 
 interface TikTokMetrics {
   total_invitations: number;
-  accepted_invitations: number;
+  successful_invitations: number;
   pending_invitations: number;
-  total_revenue: number;
-  conversion_rate: number;
+  failed_invitations: number;
+  total_revenue?: number;
+  conversion_rate?: number;
+}
+
+interface APIStatus {
+  valid: boolean;
+  connected: boolean;
+  hasToken: boolean;
 }
 
 export default function TikTokAPI() {
@@ -41,9 +56,11 @@ export default function TikTokAPI() {
   const queryClient = useQueryClient();
   const [accessToken, setAccessToken] = useState('');
   const [showManualInput, setShowManualInput] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [sessionRunning, setSessionRunning] = useState(false);
 
   // Fetch TikTok API validation status
-  const { data: validation, isLoading: validationLoading } = useQuery<TikTokValidation>({
+  const { data: validation, isLoading: validationLoading, refetch: refetchValidation } = useQuery<TikTokValidation>({
     queryKey: ['/api/tiktok/validate'],
     refetchInterval: 10000, // Check every 10 seconds
   });
@@ -54,109 +71,172 @@ export default function TikTokAPI() {
   });
 
   // Fetch TikTok metrics
-  const { data: metrics } = useQuery<TikTokMetrics>({
+  const { data: metrics, refetch: refetchMetrics } = useQuery<TikTokMetrics>({
     queryKey: ['/api/tiktok/metrics'],
     enabled: validation?.valid,
   });
 
-  // Manual token input mutation
-  const setTokenMutation = useMutation({
+  // Mutation for connecting with access token
+  const connectMutation = useMutation({
     mutationFn: async (token: string) => {
       const response = await fetch('/api/tiktok/set-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_token: token })
+        body: JSON.stringify({ access_token: token.trim() })
       });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Connection failed');
+      }
+      
       return response.json();
     },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Access token set successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/tiktok/validate'] });
-      setAccessToken('');
-      setShowManualInput(false);
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Connected Successfully",
+          description: "TikTok API is now connected and validated",
+        });
+        setAccessToken('');
+        setShowManualInput(false);
+        queryClient.invalidateQueries({ queryKey: ['/api/tiktok/validate'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tiktok/metrics'] });
+      }
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to set access token",
+        title: "Connection Failed",
+        description: error.message,
         variant: "destructive",
       });
     }
   });
 
+  // Handle manual token connection
   const handleConnect = () => {
-    if (authData?.authUrl) {
-      // Create a popup window for OAuth
-      const popup = window.open(
-        authData.authUrl, 
-        'tiktok-oauth', 
-        'width=800,height=600,scrollbars=yes,resizable=yes,toolbar=no,menubar=no'
-      );
-      
+    if (!accessToken.trim()) {
       toast({
-        title: "Redirecting to TikTok",
-        description: "Complete the authorization process in the popup window",
+        title: "Missing Token",
+        description: "Please enter your access token",
+        variant: "destructive",
       });
+      return;
+    }
+    connectMutation.mutate(accessToken);
+  };
 
-      // Listen for the OAuth callback
-      const checkClosed = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(checkClosed);
-          // Refresh the validation status after popup closes
-          setTimeout(() => {
-            queryClient.invalidateQueries({ queryKey: ['/api/tiktok/validate'] });
-          }, 1000);
-        }
-      }, 1000);
-
-      // Listen for messages from the popup
-      const messageListener = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
-        
-        if (event.data.type === 'TIKTOK_OAUTH_SUCCESS') {
-          clearInterval(checkClosed);
-          popup?.close();
-          window.removeEventListener('message', messageListener);
-          
-          toast({
-            title: "Success",
-            description: "TikTok API connected successfully",
-          });
-          
-          // Refresh validation status
-          queryClient.invalidateQueries({ queryKey: ['/api/tiktok/validate'] });
-        } else if (event.data.type === 'TIKTOK_OAUTH_ERROR') {
-          clearInterval(checkClosed);
-          popup?.close();
-          window.removeEventListener('message', messageListener);
-          
-          toast({
-            title: "Connection Failed",
-            description: event.data.error || "Failed to connect to TikTok API",
-            variant: "destructive",
-          });
-        }
-      };
-
-      window.addEventListener('message', messageListener);
+  // Generate auth URL and open in new window
+  const handleGenerateAuthUrl = async () => {
+    try {
+      const response = await fetch('/api/tiktok/auth-url');
+      const data = await response.json();
+      
+      if (response.ok && data.authUrl) {
+        window.open(data.authUrl, '_blank', 'width=800,height=600');
+        toast({
+          title: "Authorization Window Opened",
+          description: "Please complete the authorization process and return here",
+        });
+      } else {
+        throw new Error(data.message || 'Failed to generate authorization URL');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to generate authorization URL",
+        variant: "destructive",
+      });
     }
   };
 
-  const getConnectionStatus = () => {
-    if (validationLoading) return { text: 'Checking...', color: 'bg-gray-500', variant: 'secondary' as const };
-    if (validation?.valid) return { text: 'Connected', color: 'bg-green-500', variant: 'default' as const };
-    return { text: 'Disconnected', color: 'bg-red-500', variant: 'destructive' as const };
+  // Start API session
+  const startAPISession = async () => {
+    if (!validation?.valid) {
+      toast({
+        title: "API Not Connected",
+        description: "Please connect to TikTok API first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/bot/start-api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSessionRunning(true);
+        toast({
+          title: "API Session Started",
+          description: "Bot is now running using TikTok Official API"
+        });
+        refetchMetrics();
+      } else {
+        toast({
+          title: "Failed to Start",
+          description: data.message || "Failed to start API session",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start API session",
+        variant: "destructive"
+      });
+    }
   };
 
-  const status = getConnectionStatus();
+  // Stop API session
+  const stopAPISession = async () => {
+    try {
+      const response = await fetch('/api/bot/stop-api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSessionRunning(false);
+        toast({
+          title: "API Session Stopped",
+          description: "Bot session has been stopped"
+        });
+        refetchMetrics();
+      } else {
+        toast({
+          title: "Failed to Stop",
+          description: data.message || "Failed to stop API session",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to stop API session",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getStatusColor = (valid: boolean) => {
+    return valid ? 'bg-green-500' : 'bg-red-500';
+  };
+
+  const getStatusText = (valid: boolean) => {
+    return valid ? 'Connected' : 'Not Connected';
+  };
 
   return (
     <div className="flex-1 bg-background">
       {/* Header */}
-      <header className="h-20 bg-gradient-to-r from-primary/5 to-pink-50 dark:from-primary/10 dark:to-pink-950/20 border-b border-border/50 flex items-center justify-between px-8">
+      <header className="h-20 bg-gradient-to-r from-primary/5 to-pink-50 dark:from-primary/10 dark:to-pink-950/20 border-b border-border/50 flex items-center px-8">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
             <Globe className="w-6 h-6 text-primary" />
@@ -166,334 +246,288 @@ export default function TikTokAPI() {
             <p className="text-sm text-muted-foreground">Connect and manage your TikTok Business API integration</p>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className={`w-3 h-3 rounded-full ${status.color} animate-pulse`} />
-          <Badge variant={status.variant} className="text-sm">
-            {status.text}
-          </Badge>
-        </div>
       </header>
 
-      <main className="p-8 space-y-8">
-        {/* API Configuration */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Connection Status */}
-          <Card className="border-border/50 shadow-lg">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center space-x-2">
-                <Shield className="w-5 h-5 text-primary" />
-                <span>API Connection</span>
+      <main className="p-8 space-y-6">
+        {/* Connection Status Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              API Connection Status
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetchValidation()}
+                disabled={validationLoading}
+                className="ml-auto"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${validationLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${getStatusColor(validation?.valid || false)} animate-pulse`} />
+                <span className="font-medium">
+                  {getStatusText(validation?.valid || false)}
+                </span>
+                <Badge variant={validation?.valid ? 'default' : 'destructive'}>
+                  {validation?.valid ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+            </div>
+
+            {!validation?.valid && (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  TikTok API is not connected. You need to provide a valid access token to use the official API features.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {validation?.valid && (
+              <Alert>
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription>
+                  TikTok API is successfully connected and validated. You can now use all official API features.
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Connection Setup */}
+        {!validation?.valid && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Key className="h-5 w-5" />
+                Connect TikTok API
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl">
-                <div>
-                  <div className="font-semibold text-foreground mb-1">Status</div>
-                  <div className="text-sm text-muted-foreground">
-                    {validation?.valid ? 'Successfully connected to TikTok Business API' : 'Not connected to TikTok API'}
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  {validation?.valid ? (
-                    <CheckCircle className="w-8 h-8 text-green-500" />
-                  ) : (
-                    <AlertCircle className="w-8 h-8 text-red-500" />
-                  )}
-                </div>
-              </div>
-
-              {!validation?.valid && (
-                <div className="space-y-4">
-                  <div className="p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-xl">
-                    <div className="flex items-start space-x-3">
-                      <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400 mt-0.5" />
-                      <div>
-                        <div className="font-medium text-orange-800 dark:text-orange-200 mb-1">
-                          API Connection Required
-                        </div>
-                        <div className="text-sm text-orange-700 dark:text-orange-300">
-                          Connect to TikTok Business API to access creator data and send invitations.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                      <div className="text-sm text-amber-800 dark:text-amber-200">
-                        <strong>Authorization Code Received:</strong> Your TikTok authorization was successful. The authorization code from your callback URL has been processed but appears to have expired. Please generate a new access token using the manual method below or contact TikTok Business API support.
-                      </div>
-                    </div>
-                    
-                    {!showManualInput ? (
-                      <div className="space-y-3">
-                        <Button 
-                          onClick={() => setShowManualInput(true)}
-                          variant="outline"
-                          className="w-full"
-                          size="lg"
-                        >
-                          Enter Access Token Manually
-                        </Button>
-                        <Card className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
-                          <div className="space-y-3">
-                            <div className="flex items-start space-x-3">
-                              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
-                              <div>
-                                <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-1">Connection Issue Detected</h4>
-                                <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
-                                  The OAuth method requires TikTok to whitelist our callback URL. For immediate access, use the manual token method below.
-                                </p>
-                                <div className="space-y-2">
-                                  <div className="text-xs text-amber-600 dark:text-amber-400">
-                                    <strong>Quick Solution:</strong>
-                                  </div>
-                                  <ol className="text-xs text-amber-700 dark:text-amber-300 space-y-1 ml-4 list-decimal">
-                                    <li>Visit <a href="https://business-api.tiktok.com/" target="_blank" className="underline">TikTok Business API</a></li>
-                                    <li>Generate an access token with creator permissions</li>
-                                    <li>Paste the token using the manual input below</li>
-                                  </ol>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                      </div>
-                    ) : (
-                      <div className="space-y-4 p-4 bg-muted/20 rounded-xl border">
-                        <div>
-                          <Label htmlFor="access-token" className="text-sm font-medium">
-                            TikTok Business API Access Token
-                          </Label>
-                          <Textarea
-                            id="access-token"
-                            placeholder="Enter your TikTok Business API access token here..."
-                            value={accessToken}
-                            onChange={(e) => setAccessToken(e.target.value)}
-                            rows={4}
-                            className="mt-2"
-                          />
-                          <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <div className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
-                              <div><strong>Token Requirements:</strong></div>
-                              <div>• Must have "biz.creator.info" scope for creator access</div>
-                              <div>• Must have "tcm.order.update" scope for invitations</div>
-                              <div>• Token should be from your verified TikTok Business account</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button 
-                            onClick={() => setTokenMutation.mutate(accessToken)}
-                            disabled={!accessToken || setTokenMutation.isPending}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
-                          >
-                            {setTokenMutation.isPending ? 'Validating Token...' : 'Connect & Validate'}
-                          </Button>
-                          <Button 
-                            onClick={() => {
-                              setShowManualInput(false);
-                              setAccessToken('');
-                            }}
-                            variant="outline"
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* API Configuration Details */}
-          <Card className="border-border/50 shadow-lg">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center space-x-2">
-                <Settings className="w-5 h-5 text-primary" />
-                <span>Configuration</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 bg-muted/30 rounded-lg">
-                  <div className="text-sm font-medium text-muted-foreground">App ID</div>
-                  <div className="text-sm font-mono text-foreground">751264...3329</div>
-                </div>
-                <div className="p-3 bg-muted/30 rounded-lg">
-                  <div className="text-sm font-medium text-muted-foreground">Region</div>
-                  <div className="text-sm text-foreground">United Kingdom</div>
-                </div>
-                <div className="p-3 bg-muted/30 rounded-lg">
-                  <div className="text-sm font-medium text-muted-foreground">Environment</div>
-                  <div className="text-sm text-foreground">Production</div>
-                </div>
-                <div className="p-3 bg-muted/30 rounded-lg">
-                  <div className="text-sm font-medium text-muted-foreground">API Version</div>
-                  <div className="text-sm text-foreground">v1.3</div>
-                </div>
+              {/* OAuth Flow */}
+              <div className="space-y-4">
+                <h4 className="font-semibold">Option 1: OAuth Authorization (Recommended)</h4>
+                <p className="text-sm text-muted-foreground">
+                  Generate an authorization URL and complete the OAuth flow to get your access token automatically.
+                </p>
+                <Button 
+                  onClick={handleGenerateAuthUrl}
+                  className="w-full"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Generate Authorization URL
+                </Button>
               </div>
 
               <Separator />
 
-              <div className="space-y-3">
-                <div className="text-sm font-medium text-foreground">Available Scopes</div>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    'user.info.basic',
-                    'biz.creator.info', 
-                    'biz.creator.insights',
-                    'video.list',
-                    'tcm.order.update',
-                    'tto.campaign.link'
-                  ].map((scope) => (
-                    <Badge key={scope} variant="outline" className="text-xs">
-                      {scope}
-                    </Badge>
-                  ))}
+              {/* Manual Token Input */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold">Option 2: Manual Token Entry</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowManualInput(!showManualInput)}
+                  >
+                    {showManualInput ? 'Hide' : 'Show'} Manual Entry
+                  </Button>
+                </div>
+
+                {showManualInput && (
+                  <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
+                    <div className="space-y-2">
+                      <Label htmlFor="access-token">Access Token</Label>
+                      <Textarea
+                        id="access-token"
+                        placeholder="Paste your TikTok Business API access token here..."
+                        value={accessToken}
+                        onChange={(e) => setAccessToken(e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                    <Button
+                      onClick={handleConnect}
+                      disabled={connectMutation.isPending || !accessToken.trim()}
+                      className="w-full"
+                    >
+                      {connectMutation.isPending ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="w-4 h-4 mr-2" />
+                          Connect & Validate
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Help Links */}
+              <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
+                <h5 className="font-medium mb-2">Need Help Getting Your Token?</h5>
+                <div className="space-y-2 text-sm">
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => window.open('https://business-api.tiktok.com/', '_blank')}
+                    className="p-0 h-auto"
+                  >
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    Visit TikTok Business API Portal
+                  </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </section>
+        )}
 
-        {/* Metrics Dashboard */}
-        {validation?.valid && metrics && (
-          <section>
-            <Card className="border-border/50 shadow-lg">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="w-5 h-5 text-primary" />
-                  <span>API Metrics</span>
+        {/* API Features (shown when connected) */}
+        {validation?.valid && (
+          <>
+            {/* Session Control */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5" />
+                  API Bot Session Control
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center justify-between mb-3">
-                      <Users className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                      {metrics.total_invitations}
-                    </div>
-                    <div className="text-sm text-blue-700 dark:text-blue-300">Total Invitations</div>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">
+                      Session Status: {sessionRunning ? 'Running' : 'Stopped'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {sessionRunning 
+                        ? 'Bot is actively finding and inviting creators using TikTok API'
+                        : 'Click start to begin automated creator invitations'
+                      }
+                    </p>
                   </div>
-
-                  <div className="p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                    <div className="flex items-center justify-between mb-3">
-                      <CheckCircle className="w-8 h-8 text-green-600" />
-                    </div>
-                    <div className="text-2xl font-bold text-green-900 dark:text-green-100">
-                      {metrics.accepted_invitations}
-                    </div>
-                    <div className="text-sm text-green-700 dark:text-green-300">Accepted</div>
-                  </div>
-
-                  <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/20 dark:to-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                    <div className="flex items-center justify-between mb-3">
-                      <AlertCircle className="w-8 h-8 text-orange-600" />
-                    </div>
-                    <div className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                      {metrics.pending_invitations}
-                    </div>
-                    <div className="text-sm text-orange-700 dark:text-orange-300">Pending</div>
-                  </div>
-
-                  <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/20 dark:to-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
-                    <div className="flex items-center justify-between mb-3">
-                      <TrendingUp className="w-8 h-8 text-purple-600" />
-                    </div>
-                    <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                      {metrics.conversion_rate}%
-                    </div>
-                    <div className="text-sm text-purple-700 dark:text-purple-300">Conversion Rate</div>
+                  
+                  <div className="flex gap-2">
+                    {!sessionRunning ? (
+                      <Button
+                        onClick={startAPISession}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Play className="w-4 h-4 mr-2" />
+                        Start API Session
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={stopAPISession}
+                        variant="destructive"
+                      >
+                        <Pause className="w-4 h-4 mr-2" />
+                        Stop Session
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </section>
-        )}
 
-        {/* API Features */}
-        <section>
-          <Card className="border-border/50 shadow-lg">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center space-x-2">
-                <Zap className="w-5 h-5 text-primary" />
-                <span>Available Features</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  {
-                    icon: Users,
-                    title: 'Creator Discovery',
-                    description: 'Find and filter TikTok creators based on follower count, category, and engagement',
-                    enabled: validation?.valid
-                  },
-                  {
-                    icon: ExternalLink,
-                    title: 'Invitation Management',
-                    description: 'Send automated collaboration invitations to targeted creators',
-                    enabled: validation?.valid
-                  },
-                  {
-                    icon: BarChart3,
-                    title: 'Performance Analytics',
-                    description: 'Track invitation success rates and campaign performance metrics',
-                    enabled: validation?.valid
-                  },
-                  {
-                    icon: TrendingUp,
-                    title: 'GMV Optimization',
-                    description: 'Sort creators by Gross Merchandise Value for better targeting',
-                    enabled: validation?.valid
-                  },
-                  {
-                    icon: Shield,
-                    title: 'Rate Limiting',
-                    description: 'Built-in compliance with TikTok API rate limits and policies',
-                    enabled: true
-                  },
-                  {
-                    icon: Settings,
-                    title: 'Campaign Management',
-                    description: 'Create and manage multiple affiliate campaigns simultaneously',
-                    enabled: validation?.valid
-                  }
-                ].map((feature, index) => (
-                  <div key={index} className={`p-4 rounded-xl border transition-all ${
-                    feature.enabled 
-                      ? 'bg-gradient-to-br from-card to-muted/20 border-border/50 hover:border-primary/30' 
-                      : 'bg-muted/30 border-muted opacity-60'
-                  }`}>
-                    <div className="flex items-start space-x-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        feature.enabled ? 'bg-primary/10' : 'bg-muted'
-                      }`}>
-                        <feature.icon className={`w-5 h-5 ${feature.enabled ? 'text-primary' : 'text-muted-foreground'}`} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-semibold text-foreground mb-1">{feature.title}</div>
-                        <div className="text-sm text-muted-foreground leading-relaxed">
-                          {feature.description}
-                        </div>
-                        {feature.enabled && (
-                          <Badge variant="default" className="mt-2 text-xs">
-                            Available
-                          </Badge>
-                        )}
-                      </div>
+            {/* Metrics */}
+            {metrics && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    API Performance Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{metrics.total_invitations || 0}</div>
+                      <div className="text-sm text-muted-foreground">Total Invitations</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{metrics.successful_invitations || 0}</div>
+                      <div className="text-sm text-muted-foreground">Successful</div>
+                    </div>
+                    <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
+                      <div className="text-2xl font-bold text-yellow-600">{metrics.pending_invitations || 0}</div>
+                      <div className="text-sm text-muted-foreground">Pending</div>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 dark:bg-red-950/20 rounded-lg">
+                      <div className="text-2xl font-bold text-red-600">{metrics.failed_invitations || 0}</div>
+                      <div className="text-sm text-muted-foreground">Failed</div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </section>
+
+                  {metrics.total_invitations > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Success Rate</span>
+                        <span>{Math.round((metrics.successful_invitations / metrics.total_invitations) * 100)}%</span>
+                      </div>
+                      <Progress 
+                        value={(metrics.successful_invitations / metrics.total_invitations) * 100} 
+                        className="h-2"
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* API Features */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Available API Features
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium mb-2">Creator Discovery</h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Find and filter creators based on follower count, engagement rate, and categories.
+                    </p>
+                    <Badge variant="outline">Available</Badge>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium mb-2">Automated Invitations</h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Send collaboration invitations to creators automatically through the API.
+                    </p>
+                    <Badge variant="outline">Available</Badge>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium mb-2">Performance Analytics</h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Track invitation success rates and campaign performance metrics.
+                    </p>
+                    <Badge variant="outline">Available</Badge>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium mb-2">Real-time Monitoring</h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Monitor bot activities and API responses in real-time.
+                    </p>
+                    <Badge variant="outline">Available</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </main>
     </div>
   );
