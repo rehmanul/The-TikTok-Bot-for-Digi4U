@@ -85,7 +85,7 @@ export class TikTokAPIService {
    * Generate OAuth authorization URL for TikTok Business API
    */
   generateAuthUrl(state?: string): string {
-    return 'https://www.tiktok.com/v2/auth/authorize?client_key=7512649815700963329&scope=user.info.basic%2Cbiz.creator.info%2Cbiz.creator.insights%2Cvideo.list%2Ctcm.order.update%2Ctto.campaign.link&response_type=code&redirect_uri=https%3A%2F%2Fseller-uk-accounts.tiktok.com%2Faccount%2Fregister';
+    return 'https://www.tiktok.com/v2/auth/authorize?client_key=7512649815700963329&scope=user.info.basic%2Cbiz.creator.info%2Cbiz.creator.insights%2Cvideo.list%2Ctcm.order.update%2Ctto.campaign.link&response_type=code&redirect_uri=https%3A%2F%2Fthe-tiktok-bot-for-digi4u.rehmanshoj.repl.co%2Foauth-callback';
   }
 
   /**
