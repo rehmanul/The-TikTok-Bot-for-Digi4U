@@ -27,6 +27,8 @@ export function Sidebar() {
 
   const navigationItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/guide', label: 'Operation Guide', icon: Wrench },
+    { path: '/help', label: 'Help & Support', icon: Play },
     { path: '/settings', label: 'Bot Settings', icon: Settings },
     { path: '/creators', label: 'Creators', icon: Users },
     { path: '/analytics', label: 'Analytics', icon: BarChart3 },

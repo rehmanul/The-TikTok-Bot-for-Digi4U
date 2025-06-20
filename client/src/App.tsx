@@ -11,6 +11,8 @@ import Creators from '@/pages/creators';
 import Analytics from '@/pages/analytics';
 import Logs from '@/pages/logs';
 import TikTokAPI from '@/pages/tiktok-api';
+import Guide from '@/pages/guide';
+import Help from '@/pages/help';
 import { Sidebar } from '@/components/sidebar';
 
 // Import the new theme
@@ -30,6 +32,8 @@ function App() {
                   <Switch>
                     <Route path="/" component={Dashboard} />
                     <Route path="/dashboard" component={Dashboard} />
+                    <Route path="/guide" component={Guide} />
+                    <Route path="/help" component={Help} />
                     <Route path="/tiktok-api" component={TikTokAPI} />
                     <Route path="/settings" component={Settings} />
                     <Route path="/creators" component={Creators} />
