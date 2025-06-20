@@ -332,7 +332,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // TikTok API OAuth endpoints
   app.get("/api/tiktok/auth-url", async (req: Request, res: Response) => {
     try {
-      const authUrl = tikTokSessionManager.generateAuthUrl();
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const redirectUri = `${baseUrl}/oauth-callback`;
+      const authUrl = `https://business-api.tiktok.com/portal/auth?app_id=${process.env.TIKTOK_APP_ID}&state=auth_request&redirect_uri=${encodeURIComponent(redirectUri)}`;
       res.json({ authUrl });
     } catch (error) {
       res.status(500).json({ 
@@ -358,6 +360,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ 
         message: "OAuth callback failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.post("/api/tiktok/set-token", async (req: Request, res: Response) => {
+    try {
+      const { access_token } = req.body;
+      if (!access_token) {
+        return res.status(400).json({ message: "Access token is required" });
+      }
+
+      // Set the access token in the TikTok API service
+      tikTokSessionManager.updateAccessToken(access_token);
+      
+      // Validate the token
+      const isValid = await tikTokSessionManager.validateConnection();
+      
+      if (isValid) {
+        res.json({ 
+          success: true, 
+          message: "Access token set and validated successfully"
+        });
+      } else {
+        res.status(400).json({ 
+          success: false,
+          message: "Invalid access token provided"
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to set access token",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }

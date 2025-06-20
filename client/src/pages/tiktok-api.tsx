@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { 
@@ -14,6 +17,7 @@ import {
   TrendingUp, 
   CheckCircle, 
   AlertCircle, 
+  AlertTriangle,
   Settings,
   Zap,
   Globe,
@@ -35,6 +39,8 @@ interface TikTokMetrics {
 export default function TikTokAPI() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [accessToken, setAccessToken] = useState('');
+  const [showManualInput, setShowManualInput] = useState(false);
 
   // Fetch TikTok API validation status
   const { data: validation, isLoading: validationLoading } = useQuery<TikTokValidation>({
@@ -53,13 +59,89 @@ export default function TikTokAPI() {
     enabled: validation?.valid,
   });
 
+  // Manual token input mutation
+  const setTokenMutation = useMutation({
+    mutationFn: async (token: string) => {
+      const response = await fetch('/api/tiktok/set-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: token })
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Access token set successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/tiktok/validate'] });
+      setAccessToken('');
+      setShowManualInput(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to set access token",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleConnect = () => {
     if (authData?.authUrl) {
-      window.open(authData.authUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+      // Create a popup window for OAuth
+      const popup = window.open(
+        authData.authUrl, 
+        'tiktok-oauth', 
+        'width=800,height=600,scrollbars=yes,resizable=yes,toolbar=no,menubar=no'
+      );
+      
       toast({
         title: "Redirecting to TikTok",
-        description: "Complete the authorization process in the new window",
+        description: "Complete the authorization process in the popup window",
       });
+
+      // Listen for the OAuth callback
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          // Refresh the validation status after popup closes
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['/api/tiktok/validate'] });
+          }, 1000);
+        }
+      }, 1000);
+
+      // Listen for messages from the popup
+      const messageListener = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === 'TIKTOK_OAUTH_SUCCESS') {
+          clearInterval(checkClosed);
+          popup?.close();
+          window.removeEventListener('message', messageListener);
+          
+          toast({
+            title: "Success",
+            description: "TikTok API connected successfully",
+          });
+          
+          // Refresh validation status
+          queryClient.invalidateQueries({ queryKey: ['/api/tiktok/validate'] });
+        } else if (event.data.type === 'TIKTOK_OAUTH_ERROR') {
+          clearInterval(checkClosed);
+          popup?.close();
+          window.removeEventListener('message', messageListener);
+          
+          toast({
+            title: "Connection Failed",
+            description: event.data.error || "Failed to connect to TikTok API",
+            variant: "destructive",
+          });
+        }
+      };
+
+      window.addEventListener('message', messageListener);
     }
   };
 
@@ -136,14 +218,98 @@ export default function TikTokAPI() {
                     </div>
                   </div>
                   
-                  <Button 
-                    onClick={handleConnect}
-                    className="w-full bg-gradient-to-r from-primary to-pink-500 hover:from-primary/90 hover:to-pink-500/90"
-                    size="lg"
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Connect to TikTok Business API
-                  </Button>
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={handleConnect}
+                      className="w-full bg-gradient-to-r from-primary to-pink-500 hover:from-primary/90 hover:to-pink-500/90"
+                      size="lg"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Connect via OAuth
+                    </Button>
+                    
+                    <div className="text-center">
+                      <span className="text-sm text-muted-foreground">or</span>
+                    </div>
+                    
+                    {!showManualInput ? (
+                      <div className="space-y-3">
+                        <Button 
+                          onClick={() => setShowManualInput(true)}
+                          variant="outline"
+                          className="w-full"
+                          size="lg"
+                        >
+                          Enter Access Token Manually
+                        </Button>
+                        <Card className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+                          <div className="space-y-3">
+                            <div className="flex items-start space-x-3">
+                              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+                              <div>
+                                <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-1">Connection Issue Detected</h4>
+                                <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                                  The OAuth method requires TikTok to whitelist our callback URL. For immediate access, use the manual token method below.
+                                </p>
+                                <div className="space-y-2">
+                                  <div className="text-xs text-amber-600 dark:text-amber-400">
+                                    <strong>Quick Solution:</strong>
+                                  </div>
+                                  <ol className="text-xs text-amber-700 dark:text-amber-300 space-y-1 ml-4 list-decimal">
+                                    <li>Visit <a href="https://business-api.tiktok.com/" target="_blank" className="underline">TikTok Business API</a></li>
+                                    <li>Generate an access token with creator permissions</li>
+                                    <li>Paste the token using the manual input below</li>
+                                  </ol>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      </div>
+                    ) : (
+                      <div className="space-y-4 p-4 bg-muted/20 rounded-xl border">
+                        <div>
+                          <Label htmlFor="access-token" className="text-sm font-medium">
+                            TikTok Business API Access Token
+                          </Label>
+                          <Textarea
+                            id="access-token"
+                            placeholder="Enter your TikTok Business API access token here..."
+                            value={accessToken}
+                            onChange={(e) => setAccessToken(e.target.value)}
+                            rows={4}
+                            className="mt-2"
+                          />
+                          <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
+                              <div><strong>Token Requirements:</strong></div>
+                              <div>• Must have "biz.creator.info" scope for creator access</div>
+                              <div>• Must have "tcm.order.update" scope for invitations</div>
+                              <div>• Token should be from your verified TikTok Business account</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button 
+                            onClick={() => setTokenMutation.mutate(accessToken)}
+                            disabled={!accessToken || setTokenMutation.isPending}
+                            className="flex-1 bg-green-600 hover:bg-green-700"
+                          >
+                            {setTokenMutation.isPending ? 'Validating Token...' : 'Connect & Validate'}
+                          </Button>
+                          <Button 
+                            onClick={() => {
+                              setShowManualInput(false);
+                              setAccessToken('');
+                            }}
+                            variant="outline"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </CardContent>
