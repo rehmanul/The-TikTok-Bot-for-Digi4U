@@ -21,7 +21,9 @@ export default function GetAccessTokenGuide() {
     navigator.clipboard.writeText(text);
   };
 
-  const authUrl = "https://www.tiktok.com/v2/auth/authorize?client_key=7512649815700963329&scope=user.info.basic%2Cbiz.creator.info%2Cbiz.creator.insights%2Cvideo.list%2Ctcm.order.update%2Ctto.campaign.link&response_type=code&redirect_uri=https%3A%2F%2F5000-rehmanshoj-the-tiktok-bot.replit.dev%2Foauth-callback";
+  const baseUrl = window.location.origin;
+  const redirectUri = `${baseUrl}/oauth-callback`;
+  const authUrl = `https://www.tiktok.com/v2/auth/authorize?client_key=7512649815700963329&scope=user.info.basic%2Cbiz.creator.info%2Cbiz.creator.insights%2Cvideo.list%2Ctcm.order.update%2Ctto.campaign.link&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
   return (
     <div className="flex-1 bg-background">
