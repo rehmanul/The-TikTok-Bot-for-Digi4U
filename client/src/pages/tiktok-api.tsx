@@ -219,17 +219,10 @@ export default function TikTokAPI() {
                   </div>
                   
                   <div className="space-y-3">
-                    <Button 
-                      onClick={handleConnect}
-                      className="w-full bg-gradient-to-r from-primary to-pink-500 hover:from-primary/90 hover:to-pink-500/90"
-                      size="lg"
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Connect via OAuth
-                    </Button>
-                    
-                    <div className="text-center">
-                      <span className="text-sm text-muted-foreground">or</span>
+                    <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                      <div className="text-sm text-red-800 dark:text-red-200">
+                        <strong>OAuth Unavailable:</strong> Redirect URI not whitelisted in TikTok app configuration. Use manual token method below.
+                      </div>
                     </div>
                     
                     {!showManualInput ? (
