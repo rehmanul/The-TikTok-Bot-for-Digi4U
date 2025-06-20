@@ -166,15 +166,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <Link key={item.path} href={item.path}>
                   <Button
                     variant={isActive ? 'default' : 'ghost'}
-                    className={`w-full justify-start space-x-2 lg:space-x-3 transition-all duration-200 text-sm lg:text-base ${
-                      isActive 
-                        ? 'bg-blue-600/30 dark:bg-blue-500/20 border border-blue-400/40 dark:border-blue-400/30 text-white dark:text-slate-100 shadow-lg' 
-                        : 'text-white/90 dark:text-slate-300 hover:text-white dark:hover:text-slate-100 hover:bg-white/10 dark:hover:bg-slate-700/30'
+                    className={`w-full justify-start space-x-3 text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 ${
+                      isActive ? 'bg-primary/20 border border-primary/30 text-white shadow-lg' : ''
                     }`}
-                    onClick={isMobile ? onClose : undefined}
                   >
-                    <Icon className="w-4 h-4 lg:w-5 lg:h-5" />
-                    <span className="sidebar-text truncate">{item.label}</span>
+                    <Icon className="w-4 h-4" />
+                    <span className="sidebar-text">{item.label}</span>
                   </Button>
                 </Link>
               );
@@ -194,15 +191,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <Link key={item.path} href={item.path}>
                   <Button
                     variant={isActive ? 'default' : 'ghost'}
-                    className={`w-full justify-start space-x-2 lg:space-x-3 transition-all duration-200 text-sm lg:text-base ${
-                      isActive 
-                        ? 'bg-blue-600/30 dark:bg-blue-500/20 border border-blue-400/40 dark:border-blue-400/30 text-white dark:text-slate-100 shadow-lg' 
-                        : 'text-white/90 dark:text-slate-300 hover:text-white dark:hover:text-slate-100 hover:bg-white/10 dark:hover:bg-slate-700/30'
+                    className={`w-full justify-start space-x-3 text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 ${
+                      isActive ? 'bg-primary/20 border border-primary/30 text-white shadow-lg' : ''
                     }`}
-                    onClick={isMobile ? onClose : undefined}
                   >
-                    <Icon className="w-4 h-4 lg:w-5 lg:h-5" />
-                    <span className="sidebar-text truncate">{item.label}</span>
+                    <Icon className="w-4 h-4" />
+                    <span className="sidebar-text">{item.label}</span>
                   </Button>
                 </Link>
               );
@@ -222,15 +216,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <Link key={item.path} href={item.path}>
                   <Button
                     variant={isActive ? 'default' : 'ghost'}
-                    className={`w-full justify-start space-x-2 lg:space-x-3 transition-all duration-200 text-sm lg:text-base ${
-                      isActive 
-                        ? 'bg-blue-600/30 dark:bg-blue-500/20 border border-blue-400/40 dark:border-blue-400/30 text-white dark:text-slate-100 shadow-lg' 
-                        : 'text-white/90 dark:text-slate-300 hover:text-white dark:hover:text-slate-100 hover:bg-white/10 dark:hover:bg-slate-700/30'
+                    className={`w-full justify-start space-x-3 text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 ${
+                      isActive ? 'bg-primary/20 border border-primary/30 text-white shadow-lg' : ''
                     }`}
-                    onClick={isMobile ? onClose : undefined}
                   >
-                    <Icon className="w-4 h-4 lg:w-5 lg:h-5" />
-                    <span className="sidebar-text truncate">{item.label}</span>
+                    <Icon className="w-4 h-4" />
+                    <span className="sidebar-text">{item.label}</span>
                   </Button>
                 </Link>
               );
@@ -250,15 +241,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <Link key={item.path} href={item.path}>
                   <Button
                     variant={isActive ? 'default' : 'ghost'}
-                    className={`w-full justify-start space-x-2 lg:space-x-3 transition-all duration-200 text-sm lg:text-base ${
-                      isActive 
-                        ? 'bg-blue-600/30 dark:bg-blue-500/20 border border-blue-400/40 dark:border-blue-400/30 text-white dark:text-slate-100 shadow-lg' 
-                        : 'text-white/90 dark:text-slate-300 hover:text-white dark:hover:text-slate-100 hover:bg-white/10 dark:hover:bg-slate-700/30'
+                    className={`w-full justify-start space-x-3 text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 ${
+                      isActive ? 'bg-primary/20 border border-primary/30 text-white shadow-lg' : ''
                     }`}
-                    onClick={isMobile ? onClose : undefined}
                   >
-                    <Icon className="w-4 h-4 lg:w-5 lg:h-5" />
-                    <span className="sidebar-text truncate">{item.label}</span>
+                    <Icon className="w-4 h-4" />
+                    <span className="sidebar-text">{item.label}</span>
                   </Button>
                 </Link>
               );

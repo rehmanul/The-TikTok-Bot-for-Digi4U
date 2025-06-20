@@ -61,7 +61,7 @@
   }
 
   * {
-    border-color: hsl(var(--border));
+    @apply border-border;
   }
   
   body {
