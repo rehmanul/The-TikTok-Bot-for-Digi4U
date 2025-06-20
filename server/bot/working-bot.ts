@@ -118,7 +118,7 @@ export class WorkingTikTokBot {
       const currentUrl = this.page.url();
       const success = !currentUrl.includes('/login') && !currentUrl.includes('/signin');
 
-      await this.activityLogger.logBotAction(success ? 'login_success' : 'login_failed', this.sessionId, undefined, {
+      await this.activityLogger.logBotAction(success ? 'login_success' : 'login_failed', this.sessionId || undefined, undefined, {
         email,
         currentUrl,
         timestamp: new Date().toISOString()
@@ -270,7 +270,7 @@ export class WorkingTikTokBot {
                     lastInvited: new Date()
                   });
 
-                  await this.activityLogger.logBotAction('invitation_sent', this.sessionId, undefined, {
+                  await this.activityLogger.logBotAction('invitation_sent', this.sessionId || undefined, undefined, {
                     creatorIndex: i,
                     timestamp: new Date().toISOString()
                   });

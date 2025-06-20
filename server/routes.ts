@@ -113,7 +113,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Bot control routes
   app.post('/api/bot/start', async (req, res) => {
     try {
-      const sessionManager = SessionManager.getInstance();
+      const { SessionManager } = await import('./bot/session-manager');
+      const sessionManager = new SessionManager();
       await sessionManager.startSession();
       res.json({ success: true, message: 'Bot session started successfully' });
     } catch (error) {
@@ -127,7 +128,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/bot/start-api', async (req, res) => {
     try {
-      const tiktokManager = TikTokSessionManager.getInstance();
+      const { TikTokSessionManager } = await import('./services/tiktok-session-manager');
+      const tiktokManager = new TikTokSessionManager();
       const isValid = await tiktokManager.validateConnection();
 
       if (!isValid) {
@@ -154,7 +156,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/bot/stop-api', async (req, res) => {
     try {
-      const tiktokManager = TikTokSessionManager.getInstance();
+      const { TikTokSessionManager } = await import('./services/tiktok-session-manager');
+      const tiktokManager = new TikTokSessionManager();
       await tiktokManager.stopAPISession();
       await activityLogger.logBotAction('api_session_stopped', undefined, undefined, { timestamp: new Date().toISOString() });
 
