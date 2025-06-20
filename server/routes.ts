@@ -435,7 +435,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // TikTok API OAuth endpoints
   app.get("/api/tiktok/auth-url", async (req: Request, res: Response) => {
     try {
-      const authUrl = 'https://www.tiktok.com/v2/auth/authorize?client_key=7512649815700963329&scope=user.info.basic%2Cbiz.creator.info%2Cbiz.creator.insights%2Cvideo.list%2Ctcm.order.update%2Ctto.campaign.link&response_type=code&redirect_uri=https%3A%2F%2Fseller-uk-accounts.tiktok.com%2Faccount%2Fregister';
+      const baseUrl = process.env.REPL_URL || `${req.protocol}://${req.get('host')}`;
+      const redirectUri = `${baseUrl}/oauth-callback`;
+      const authUrl = `https://www.tiktok.com/v2/auth/authorize?client_key=7512649815700963329&scope=user.info.basic%2Cbiz.creator.info%2Cbiz.creator.insights%2Cvideo.list%2Ctcm.order.update%2Ctto.campaign.link&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}`;
       res.json({ authUrl });
     } catch (error) {
       res.status(500).json({ 
@@ -640,6 +642,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Failed to stop API session",
         error: error instanceof Error ? error.message : "Unknown error"
       });
+    }
+  });
+
+  // OAuth callback handler
+  app.get("/oauth-callback", async (req: Request, res: Response) => {
+    try {
+      const { code, state, error } = req.query;
+
+      if (error) {
+        return res.redirect(`/tiktok-api?error=${encodeURIComponent(error as string)}`);
+      }
+
+      if (!code) {
+        return res.redirect('/tiktok-api?error=no_code_received');
+      }
+
+      // Exchange code for access token
+      const tokenResponse = await fetch('https://business-api.tiktok.com/open_api/v1.3/oauth2/access_token/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          app_id: process.env.TIKTOK_APP_ID || '7512649815700963329',
+          secret: process.env.TIKTOK_APP_SECRET || 'e448a875d92832486230db13be28db0444035303',
+          auth_code: code,
+          grant_type: 'authorization_code'
+        })
+      });
+
+      const tokenData = await tokenResponse.json();
+
+      if (tokenData.code === 0 && tokenData.data?.access_token) {
+        // Set the access token in the session manager
+        tikTokSessionManager.updateAccessToken(tokenData.data.access_token);
+
+        // Validate the token
+        const isValid = await tikTokSessionManager.validateConnection();
+
+        if (isValid) {
+          return res.redirect('/tiktok-api?success=true&message=token_obtained');
+        } else {
+          return res.redirect('/tiktok-api?error=token_validation_failed');
+        }
+      } else {
+        return res.redirect(`/tiktok-api?error=${encodeURIComponent(tokenData.message || 'token_exchange_failed')}`);
+      }
+    } catch (error) {
+      console.error('OAuth callback error:', error);
+      return res.redirect(`/tiktok-api?error=${encodeURIComponent('callback_processing_failed')}`);
     }
   });
 
