@@ -60,11 +60,11 @@ export class TikTokAPI {
    */
   getAuthUrl(redirectUri: string, state?: string): string {
     const params = new URLSearchParams({
-      app_id: this.config.appId,
-      redirect_uri: redirectUri,
+      app_id: '7512649815700963329',
+      redirect_uri: 'https://affiliate.tiktok.com/connection/creator?shop_region=GB&is_new_user=0&is_new_connect=0',
       response_type: 'code',
       scope: 'user.info.basic,biz.creator.info,biz.creator.insights,video.list,tcm.order.update,tto.campaign.link',
-      state: state || 'default_state'
+      state: state || 'your_custom_params'
     });
 
     return `https://business-api.tiktok.com/portal/auth?${params.toString()}`;

@@ -8,24 +8,28 @@
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 346.8 77.2% 49.8%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --primary: 0 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 330 100% 50%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 330 100% 50%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 346.8 77.2% 49.8%;
-    --chart-1: 346.8 77.2% 49.8%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
+    --ring: 0 100% 50%;
+    --chart-1: 0 100% 50%;
+    --chart-2: 330 100% 50%;
+    --chart-3: 195 100% 50%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --tiktok-red: 0 100% 50%;
+    --tiktok-pink: 330 100% 50%;
+    --tiktok-cyan: 195 100% 50%;
+    --tiktok-black: 240 10% 3.9%;
     --radius: 0.75rem;
   }
 
@@ -36,14 +40,14 @@
     --card-foreground: 0 0% 95%;
     --popover: 0 0% 9%;
     --popover-foreground: 0 0% 95%;
-    --primary: 346.8 77.2% 49.8%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --primary: 0 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 330 100% 50%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 0 0% 15%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 12 6.5% 15.1%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 330 100% 50%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 85.7% 97.3%;
     --border: 240 3.7% 15.9%;
@@ -61,10 +65,62 @@
   }
 
   body {
-    background-color: hsl(var(--background));
+    background: linear-gradient(135deg, #ff0050 0%, #ff4068 25%, #ff0050 50%, #25f4ee 75%, #ff0050 100%);
+    background-size: 400% 400%;
+    animation: tiktokGradient 8s ease-in-out infinite;
     color: hsl(var(--foreground));
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
   }
+
+  @keyframes tiktokGradient {
+    0% { background-position: 0% 50%; }
+    25% { background-position: 100% 50%; }
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0% 100%; }
+    100% { background-position: 0% 50%; }
+  }
+}
+
+/* TikTok Custom Styles */
+.tiktok-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(255, 0, 80, 0.1);
+}
+
+.dark .tiktok-card {
+  background: rgba(20, 20, 30, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 0, 80, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(255, 0, 80, 0.2);
+}
+
+.tiktok-button {
+  background: linear-gradient(45deg, #ff0050, #ff4068);
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px 0 rgba(255, 0, 80, 0.3);
+}
+
+.tiktok-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(255, 0, 80, 0.4);
+}
+
+.tiktok-secondary-button {
+  background: linear-gradient(45deg, #25f4ee, #00d4ff);
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px 0 rgba(37, 244, 238, 0.3);
+}
+
+.tiktok-secondary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(37, 244, 238, 0.4);
 }
 
 /* Quick Actions: ensure color contrast and dark/light support */

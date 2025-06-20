@@ -117,6 +117,13 @@ This is a sophisticated web automation application built for Digi4U (UK) to auto
 
 ## Changelog
 
+- June 20, 2025: Replit migration completed
+  - Successfully migrated from Replit Agent to standard Replit environment
+  - Created PostgreSQL database with all required tables using Drizzle migrations
+  - Updated TikTok API authorization URLs for production (App ID: 7512649815700963329)
+  - Added TikTok-themed UI styling with animated gradient background and custom components
+  - Fixed cross-env dependency issue and verified application startup
+  - Application now running successfully on localhost:5000 with full functionality
 - June 14, 2025: Production migration completed
   - Added comprehensive security middleware (Helmet, rate limiting, CORS)
   - Implemented database connection pooling and error handling
