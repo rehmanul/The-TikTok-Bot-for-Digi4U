@@ -17,7 +17,7 @@ export class TikTokSessionManager {
       appId: process.env.TIKTOK_APP_ID || '7512649815700963329',
       appSecret: process.env.TIKTOK_APP_SECRET || 'e448a875d92832486230db13be28db0444035303',
       accessToken: process.env.TIKTOK_ACCESS_TOKEN || '',
-      redirectUri: 'https://the-tiktok-bot-for-digi4u.rehmanshoj.repl.co/oauth-callback'
+      redirectUri: 'https://5000-rehmanshoj-the-tiktok-bot.replit.dev/oauth-callback'
     };
 
     this.apiService = new TikTokAPIService(config);

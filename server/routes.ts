@@ -435,7 +435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // TikTok API OAuth endpoints
   app.get("/api/tiktok/auth-url", async (req: Request, res: Response) => {
     try {
-      const redirectUri = 'https://the-tiktok-bot-for-digi4u.rehmanshoj.repl.co/oauth-callback';
+      const redirectUri = 'https://5000-rehmanshoj-the-tiktok-bot.replit.dev/oauth-callback';
       const authUrl = `https://www.tiktok.com/v2/auth/authorize?client_key=7512649815700963329&scope=user.info.basic%2Cbiz.creator.info%2Cbiz.creator.insights%2Cvideo.list%2Ctcm.order.update%2Ctto.campaign.link&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}`;
       res.json({ authUrl });
     } catch (error) {
