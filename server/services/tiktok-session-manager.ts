@@ -19,7 +19,9 @@ export class TikTokSessionManager {
       accessToken: process.env.TIKTOK_ACCESS_TOKEN || '',
       redirectUri: process.env.NODE_ENV === 'production' 
         ? 'https://the-tiktok-bot-for-digi4u.onrender.com/oauth-callback'
-        : 'https://5000-rehmanshoj-the-tiktok-bot.replit.dev/oauth-callback'
+        : process.env.REPLIT_DEV_DOMAIN 
+          ? `https://${process.env.REPLIT_DEV_DOMAIN}/oauth-callback`
+          : 'https://5000-rehmanshoj-the-tiktok-bot.replit.dev/oauth-callback'
     };
 
     this.apiService = new TikTokAPIService(config);

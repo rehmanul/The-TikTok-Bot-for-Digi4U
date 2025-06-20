@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,9 +21,15 @@ export default function GetAccessTokenGuide() {
     navigator.clipboard.writeText(text);
   };
 
-  const baseUrl = window.location.origin;
-  const redirectUri = `${baseUrl}/oauth-callback`;
-  const authUrl = `https://www.tiktok.com/v2/auth/authorize?client_key=7512649815700963329&scope=user.info.basic%2Cbiz.creator.info%2Cbiz.creator.insights%2Cvideo.list%2Ctcm.order.update%2Ctto.campaign.link&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}`;
+  // Use the API endpoint to get the correct auth URL
+  const [authUrl, setAuthUrl] = useState('');
+
+  useEffect(() => {
+    fetch('/api/tiktok/auth-url')
+      .then(res => res.json())
+      .then(data => setAuthUrl(data.authUrl))
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="flex-1 bg-background">
@@ -111,12 +117,13 @@ export default function GetAccessTokenGuide() {
                 </div>
 
                 <Button 
-                  onClick={() => window.open(authUrl, '_blank')}
+                  onClick={() => authUrl && window.open(authUrl, '_blank')}
+                  disabled={!authUrl}
                   className="w-full bg-gradient-to-r from-primary to-pink-500 hover:from-primary/90 hover:to-pink-500/90"
                   size="lg"
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  Authorize App & Get Access Token
+                  {authUrl ? 'Authorize App & Get Access Token' : 'Loading...'}
                 </Button>
               </div>
             </CardContent>
