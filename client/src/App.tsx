@@ -53,20 +53,22 @@ function App() {
                     
                     {/* Main Content */}
                     <main className="flex-1 overflow-auto">
-                      <Switch>
-                        <Route path="/" component={Dashboard} />
-                        <Route path="/dashboard" component={Dashboard} />
-                        <Route path="/guide" component={Guide} />
-                        <Route path="/help" component={Help} />
-                        <Route path="/oauth-callback" component={OAuthCallback} />
-                        <Route path="/tiktok-api" component={TikTokAPI} />
-                        <Route path="/real-bot" component={RealBot} />
-                        <Route path="/settings" component={Settings} />
-                        <Route path="/creators" component={Creators} />
-                        <Route path="/analytics" component={Analytics} />
-                        <Route path="/logs" component={Logs} />
-                        <Route component={NotFound} />
-                      </Switch>
+                      <AnimatedRoute location={location} variant="slide">
+                        <Switch>
+                          <Route path="/" component={Dashboard} />
+                          <Route path="/dashboard" component={Dashboard} />
+                          <Route path="/guide" component={Guide} />
+                          <Route path="/help" component={Help} />
+                          <Route path="/oauth-callback" component={OAuthCallback} />
+                          <Route path="/tiktok-api" component={TikTokAPI} />
+                          <Route path="/real-bot" component={RealBot} />
+                          <Route path="/settings" component={Settings} />
+                          <Route path="/creators" component={Creators} />
+                          <Route path="/analytics" component={Analytics} />
+                          <Route path="/logs" component={Logs} />
+                          <Route component={NotFound} />
+                        </Switch>
+                      </AnimatedRoute>
                     </main>
                   </div>
                 </div>

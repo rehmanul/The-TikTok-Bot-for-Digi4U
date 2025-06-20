@@ -101,9 +101,11 @@ export default function Logs() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 p-4 lg:p-6 overflow-auto space-y-4 lg:space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <StaggerContainer className="space-y-4 lg:space-y-6">
+          {/* Stats Cards */}
+          <StaggerItem>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
@@ -240,8 +242,10 @@ export default function Logs() {
                 </TableBody>
               </Table>
             </ScrollArea>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </StaggerItem>
+        </StaggerContainer>
       </main>
     </div>
   );

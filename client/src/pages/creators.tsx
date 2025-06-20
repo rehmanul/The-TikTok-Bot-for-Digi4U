@@ -88,9 +88,11 @@ export default function Creators() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 p-4 lg:p-6 overflow-auto space-y-4 lg:space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <StaggerContainer className="space-y-4 lg:space-y-6">
+          {/* Stats Cards */}
+          <StaggerItem>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
@@ -139,20 +141,22 @@ export default function Creators() {
             </CardContent>
           </Card>
         </div>
+          </StaggerItem>
 
-        {/* Filters */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <span>Creator Database</span>
-              <HelpTooltip 
-                content="Browse all discovered creators. Use filters to find creators by category, follower count, or invitation status. Click on creators to view detailed profiles."
-                variant="tip"
-                side="right"
-              />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+          {/* Filters */}
+          <StaggerItem>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <span>Creator Database</span>
+                  <HelpTooltip 
+                    content="Browse all discovered creators. Use filters to find creators by category, follower count, or invitation status. Click on creators to view detailed profiles."
+                    variant="tip"
+                    side="right"
+                  />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1">
                 <div className="relative">
@@ -262,8 +266,10 @@ export default function Creators() {
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </StaggerItem>
+        </StaggerContainer>
       </main>
     </div>
   );
