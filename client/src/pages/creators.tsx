@@ -23,57 +23,25 @@ import {
   Heart
 } from 'lucide-react';
 
-// Mock data for creators
-const mockCreators = [
-  {
-    id: 1,
-    username: '@fashionista_uk',
-    name: 'Emma Thompson',
-    followers: 125000,
-    category: 'Fashion',
-    lastInvited: '2024-01-15',
-    status: 'accepted',
-    engagement: '4.2%',
-    avatar: null
-  },
-  {
-    id: 2,
-    username: '@fitness_guru_london',
-    name: 'James Wilson',
-    followers: 89000,
-    category: 'Fitness',
-    lastInvited: '2024-01-14',
-    status: 'pending',
-    engagement: '3.8%',
-    avatar: null
-  },
-  {
-    id: 3,
-    username: '@beauty_by_sarah',
-    name: 'Sarah Johnson',
-    followers: 156000,
-    category: 'Beauty',
-    lastInvited: '2024-01-13',
-    status: 'declined',
-    engagement: '5.1%',
-    avatar: null
-  },
-  {
-    id: 4,
-    username: '@lifestyle_london',
-    name: 'Alex Brown',
-    followers: 67000,
-    category: 'Lifestyle',
-    lastInvited: null,
-    status: 'not_invited',
-    engagement: '3.2%',
-    avatar: null
+import { useQuery } from '@tanstack/react-query';
+
+const fetchCreators = async () => {
+  const response = await fetch('/api/creators');
+  if (!response.ok) {
+    throw new Error('Failed to fetch creators');
   }
-];
+  return response.json();
+};
 
 export default function Creators() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  
+  const { data: creators = [], isLoading, error } = useQuery({
+    queryKey: ['creators'],
+    queryFn: fetchCreators,
+    refetchInterval: 30000,
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -90,10 +58,10 @@ export default function Creators() {
     }
   };
 
-  const filteredCreators = mockCreators.filter(creator => {
-    const matchesSearch = creator.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         creator.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || creator.category.toLowerCase() === selectedCategory;
+  const filteredCreators = creators.filter((creator: any) => {
+    const matchesSearch = creator.username.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || 
+                           creator.category?.toLowerCase() === selectedCategory.toLowerCase();
     return matchesSearch && matchesCategory;
   });
 
@@ -120,7 +88,7 @@ export default function Creators() {
               <div className="flex items-center space-x-2">
                 <Users className="w-8 h-8 text-blue-500" />
                 <div>
-                  <p className="text-2xl font-bold">1,247</p>
+                  <div className="text-3xl font-bold">{creators.length}</div>
                   <p className="text-xs text-muted-foreground">Total Creators</p>
                 </div>
               </div>
@@ -132,7 +100,7 @@ export default function Creators() {
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-8 h-8 text-green-500" />
                 <div>
-                  <p className="text-2xl font-bold">89</p>
+                  <div className="text-3xl font-bold">{creators.filter((c: any) => c.inviteStatus === 'accepted').length}</div>
                   <p className="text-xs text-muted-foreground">Active Partners</p>
                 </div>
               </div>
@@ -144,7 +112,7 @@ export default function Creators() {
               <div className="flex items-center space-x-2">
                 <MessageSquare className="w-8 h-8 text-orange-500" />
                 <div>
-                  <p className="text-2xl font-bold">156</p>
+                  <div className="text-3xl font-bold">{creators.filter((c: any) => c.inviteStatus === 'pending').length}</div>
                   <p className="text-xs text-muted-foreground">Pending Invites</p>
                 </div>
               </div>
@@ -156,8 +124,8 @@ export default function Creators() {
               <div className="flex items-center space-x-2">
                 <Heart className="w-8 h-8 text-red-500" />
                 <div>
-                  <p className="text-2xl font-bold">4.2%</p>
-                  <p className="text-xs text-muted-foreground">Avg Engagement</p>
+                  <div className="text-3xl font-bold">{creators.length > 0 ? ((creators.filter((c: any) => c.inviteStatus === 'accepted').length / creators.length) * 100).toFixed(1) + '%' : '0%'}</div>
+                  <p className="text-xs text-muted-foreground">Response Rate</p>
                 </div>
               </div>
             </CardContent>

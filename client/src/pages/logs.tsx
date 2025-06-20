@@ -24,59 +24,25 @@ import {
   Info
 } from 'lucide-react';
 
-// Mock activity data
-const activityData = [
-  {
-    id: 1,
-    type: 'invite_sent',
-    description: 'Invitation sent to @fashionista_uk',
-    status: 'success',
-    timestamp: '2024-03-11T14:32:00Z',
-    metadata: {
-      creator: '@fashionista_uk',
-      followers: '125K',
-      category: 'Fashion'
-    }
-  },
-  {
-    id: 2,
-    type: 'invite_accepted',
-    description: '@beauty_guru accepted invitation',
-    status: 'success',
-    timestamp: '2024-03-11T14:30:00Z',
-    metadata: {
-      creator: '@beauty_guru',
-      followers: '89K',
-      category: 'Beauty'
-    }
-  },
-  {
-    id: 3,
-    type: 'error',
-    description: 'Failed to send invitation to @lifestyle_london',
-    status: 'error',
-    timestamp: '2024-03-11T14:28:00Z',
-    metadata: {
-      error: 'Rate limit exceeded',
-      creator: '@lifestyle_london'
-    }
-  },
-  {
-    id: 4,
-    type: 'bot_started',
-    description: 'Bot session started',
-    status: 'info',
-    timestamp: '2024-03-11T14:25:00Z',
-    metadata: {
-      session_id: '123456',
-      config: 'default'
-    }
+import { useQuery } from '@tanstack/react-query';
+
+const fetchActivities = async () => {
+  const response = await fetch('/api/activities');
+  if (!response.ok) {
+    throw new Error('Failed to fetch activities');
   }
-];
+  return response.json();
+};
 
 export default function Logs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  
+  const { data: activities = [], isLoading, error } = useQuery({
+    queryKey: ['activities'],
+    queryFn: fetchActivities,
+    refetchInterval: 5000,
+  });
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -143,7 +109,7 @@ export default function Logs() {
               <div className="flex items-center space-x-2">
                 <Activity className="w-8 h-8 text-blue-500" />
                 <div>
-                  <p className="text-2xl font-bold">1,247</p>
+                  <div className="text-3xl font-bold">{activities.length}</div>
                   <p className="text-xs text-muted-foreground">Total Events</p>
                 </div>
               </div>
@@ -155,7 +121,7 @@ export default function Logs() {
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-8 h-8 text-green-500" />
                 <div>
-                  <p className="text-2xl font-bold">892</p>
+                  <div className="text-3xl font-bold">{activities.filter((a: any) => a.type !== 'error').length}</div>
                   <p className="text-xs text-muted-foreground">Successful</p>
                 </div>
               </div>
@@ -167,7 +133,7 @@ export default function Logs() {
               <div className="flex items-center space-x-2">
                 <XCircle className="w-8 h-8 text-red-500" />
                 <div>
-                  <p className="text-2xl font-bold">23</p>
+                  <div className="text-3xl font-bold">{activities.filter((a: any) => a.type === 'error').length}</div>
                   <p className="text-xs text-muted-foreground">Errors</p>
                 </div>
               </div>
@@ -179,7 +145,7 @@ export default function Logs() {
               <div className="flex items-center space-x-2">
                 <AlertCircle className="w-8 h-8 text-yellow-500" />
                 <div>
-                  <p className="text-2xl font-bold">45</p>
+                  <div className="text-3xl font-bold">{activities.filter((a: any) => a.type === 'warning').length}</div>
                   <p className="text-xs text-muted-foreground">Warnings</p>
                 </div>
               </div>

@@ -307,6 +307,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get creators
+  app.get("/api/creators", async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const creators = await storage.getCreatorsForInvitation(Math.min(limit, 500));
+      res.json(creators);
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to fetch creators",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Get activity summary
   app.get("/api/activities/summary", async (req: Request, res: Response) => {
     try {

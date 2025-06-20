@@ -134,9 +134,7 @@ export class TikTokAPI {
         throw new Error(`TikTok API Error: ${response.data.message}`);
       }
     } catch (error) {
-      // Return mock data for development if API fails
-      console.warn('TikTok API not available, using mock data for development');
-      return this.generateMockCreators(filters.limit || 10);
+      throw new Error(`Failed to search creators: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -160,14 +158,7 @@ export class TikTokAPI {
         throw new Error(`TikTok API Error: ${response.data.message}`);
       }
     } catch (error) {
-      // Return mock response for development
-      console.warn('TikTok API not available, using mock response for development');
-      return {
-        invitation_id: `inv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        status: 'sent',
-        creator_id: invitation.creator_id,
-        sent_at: new Date().toISOString()
-      };
+      throw new Error(`Failed to send invitation: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -194,8 +185,7 @@ export class TikTokAPI {
         throw new Error(`TikTok API Error: ${response.data.message}`);
       }
     } catch (error) {
-      console.warn('TikTok API not available, using mock data for development');
-      return [];
+      throw new Error(`Failed to get invitation history: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -222,40 +212,8 @@ export class TikTokAPI {
         throw new Error(`TikTok API Error: ${response.data.message}`);
       }
     } catch (error) {
-      console.warn('TikTok API not available, using mock data for development');
-      return {
-        total_invitations: 0,
-        accepted_invitations: 0,
-        pending_invitations: 0,
-        total_revenue: 0,
-        conversion_rate: 0
-      };
+      throw new Error(`Failed to get campaign metrics: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }
-
-  /**
-   * Generate mock creators for development
-   */
-  private generateMockCreators(count: number): CreatorProfile[] {
-    const categories = ['Electronics', 'Fashion', 'Beauty', 'Home & Garden', 'Sports', 'Food & Beverage'];
-    const creators: CreatorProfile[] = [];
-
-    for (let i = 0; i < count; i++) {
-      creators.push({
-        creator_id: `creator_${i + 1}`,
-        username: `creator${i + 1}`,
-        display_name: `Creator ${i + 1}`,
-        follower_count: Math.floor(Math.random() * 900000) + 100000,
-        engagement_rate: Math.floor(Math.random() * 10) + 1,
-        categories: [categories[Math.floor(Math.random() * categories.length)]],
-        gmv_score: Math.floor(Math.random() * 100) + 1,
-        bio: `Professional content creator specializing in ${categories[Math.floor(Math.random() * categories.length)]}`,
-        avatar_url: `https://via.placeholder.com/150x150?text=Creator${i + 1}`,
-        verified: Math.random() > 0.7
-      });
-    }
-
-    return creators.sort((a, b) => b.gmv_score - a.gmv_score);
   }
 
   /**
@@ -300,13 +258,7 @@ export class TikTokAPI {
         throw new Error(`TikTok API Error: ${response.data.message}`);
       }
     } catch (error) {
-      console.warn('TikTok API not available, using mock data for development');
-      return {
-        advertiser_id: 'mock_advertiser_123',
-        advertiser_name: 'Digi4u Repair UK',
-        timezone: 'Europe/London',
-        currency: 'GBP'
-      };
+      throw new Error(`Failed to get advertiser info: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }
