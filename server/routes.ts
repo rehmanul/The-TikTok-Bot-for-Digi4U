@@ -365,6 +365,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/tiktok/exchange-code", async (req: Request, res: Response) => {
+    try {
+      const { authorizationCode } = req.body;
+      
+      if (!authorizationCode) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Authorization code is required"
+        });
+      }
+
+      // Extract code from URL if full URL provided
+      let code = authorizationCode;
+      if (code.includes('code=')) {
+        const urlParams = new URLSearchParams(code.split('?')[1]);
+        code = urlParams.get('code') || '';
+      }
+
+      if (!code) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Could not extract authorization code"
+        });
+      }
+
+      // Exchange code for access token using TikTok API
+      const response = await fetch('https://business-api.tiktok.com/open_api/v1.3/oauth2/access_token/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          app_id: '7512649815700963329',
+          secret: 'e448a875d92832486230db13be28db0444035303',
+          auth_code: code,
+          grant_type: 'authorization_code'
+        })
+      });
+
+      const tokenData = await response.json();
+
+      if (tokenData.code === 0 && tokenData.data?.access_token) {
+        // Set the access token in the session manager
+        tikTokSessionManager.updateAccessToken(tokenData.data.access_token);
+        
+        // Validate the token
+        const isValid = await tikTokSessionManager.validateConnection();
+        
+        if (isValid) {
+          res.json({
+            success: true,
+            message: "Access token obtained and validated successfully",
+            token: tokenData.data.access_token.substring(0, 20) + "..."
+          });
+        } else {
+          res.status(400).json({
+            success: false,
+            message: "Token obtained but validation failed"
+          });
+        }
+      } else {
+        res.status(400).json({
+          success: false,
+          message: tokenData.message || "Failed to obtain access token",
+          error: tokenData
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to exchange authorization code",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   app.post("/api/tiktok/set-token", async (req: Request, res: Response) => {
     try {
       const { access_token } = req.body;

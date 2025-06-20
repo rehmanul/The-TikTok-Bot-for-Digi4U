@@ -219,9 +219,9 @@ export default function TikTokAPI() {
                   </div>
                   
                   <div className="space-y-3">
-                    <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-                      <div className="text-sm text-red-800 dark:text-red-200">
-                        <strong>OAuth Unavailable:</strong> Redirect URI not whitelisted in TikTok app configuration. Use manual token method below.
+                    <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <div className="text-sm text-amber-800 dark:text-amber-200">
+                        <strong>Authorization Code Received:</strong> Your TikTok authorization was successful. The authorization code from your callback URL has been processed but appears to have expired. Please generate a new access token using the manual method below or contact TikTok Business API support.
                       </div>
                     </div>
                     
