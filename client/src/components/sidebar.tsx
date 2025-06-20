@@ -26,15 +26,22 @@ export function Sidebar() {
   const { data: botStatus } = useBotStatus();
 
   const navigationItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/real-bot', label: 'Real Bot', icon: Rocket },
-    { path: '/guide', label: 'Operation Guide', icon: Wrench },
-    { path: '/help', label: 'Help & Support', icon: Play },
-    { path: '/settings', label: 'Bot Settings', icon: Settings },
-    { path: '/creators', label: 'Creators', icon: Users },
-    { path: '/analytics', label: 'Analytics', icon: BarChart3 },
-    { path: '/tiktok-api', label: 'TikTok API', icon: Rocket },
-    { path: '/logs', label: 'Activity Logs', icon: ScrollText },
+    // Main sections
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, section: 'main' },
+    { path: '/real-bot', label: 'Real Bot', icon: Rocket, section: 'main' },
+    
+    // Configuration & Management
+    { path: '/settings', label: 'Bot Settings', icon: Settings, section: 'config' },
+    { path: '/creators', label: 'Creators', icon: Users, section: 'config' },
+    { path: '/tiktok-api', label: 'TikTok API', icon: Rocket, section: 'config' },
+    
+    // Monitoring & Analytics
+    { path: '/analytics', label: 'Analytics', icon: BarChart3, section: 'monitoring' },
+    { path: '/logs', label: 'Activity Logs', icon: ScrollText, section: 'monitoring' },
+    
+    // Help & Support
+    { path: '/guide', label: 'Operation Guide', icon: Wrench, section: 'help' },
+    { path: '/help', label: 'Help & Support', icon: Play, section: 'help' },
   ];
 
   const getStatusColor = (status: string) => {
@@ -109,25 +116,103 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-6">
-        <div className="space-y-2">
-          {navigationItems.map((item) => {
-            const isActive = location === item.path;
-            const Icon = item.icon;
-            
-            return (
-              <Link key={item.path} href={item.path}>
-                <Button
-                  variant={isActive ? 'default' : 'ghost'}
-                  className={`w-full justify-start space-x-3 text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 ${
-                    isActive ? 'bg-primary/20 border border-primary/30 text-white shadow-lg' : ''
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="sidebar-text">{item.label}</span>
-                </Button>
-              </Link>
-            );
-          })}
+        <div className="space-y-6">
+          {/* Main Section */}
+          <div className="space-y-2">
+            {navigationItems.filter(item => item.section === 'main').map((item) => {
+              const isActive = location === item.path;
+              const Icon = item.icon;
+              
+              return (
+                <Link key={item.path} href={item.path}>
+                  <Button
+                    variant={isActive ? 'default' : 'ghost'}
+                    className={`w-full justify-start space-x-3 text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 ${
+                      isActive ? 'bg-primary/20 border border-primary/30 text-white shadow-lg' : ''
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="sidebar-text">{item.label}</span>
+                  </Button>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Configuration & Management */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider px-2">
+              Configuration
+            </h3>
+            {navigationItems.filter(item => item.section === 'config').map((item) => {
+              const isActive = location === item.path;
+              const Icon = item.icon;
+              
+              return (
+                <Link key={item.path} href={item.path}>
+                  <Button
+                    variant={isActive ? 'default' : 'ghost'}
+                    className={`w-full justify-start space-x-3 text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 ${
+                      isActive ? 'bg-primary/20 border border-primary/30 text-white shadow-lg' : ''
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="sidebar-text">{item.label}</span>
+                  </Button>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Monitoring & Analytics */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider px-2">
+              Monitoring
+            </h3>
+            {navigationItems.filter(item => item.section === 'monitoring').map((item) => {
+              const isActive = location === item.path;
+              const Icon = item.icon;
+              
+              return (
+                <Link key={item.path} href={item.path}>
+                  <Button
+                    variant={isActive ? 'default' : 'ghost'}
+                    className={`w-full justify-start space-x-3 text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 ${
+                      isActive ? 'bg-primary/20 border border-primary/30 text-white shadow-lg' : ''
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="sidebar-text">{item.label}</span>
+                  </Button>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Help & Support */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider px-2">
+              Help & Support
+            </h3>
+            {navigationItems.filter(item => item.section === 'help').map((item) => {
+              const isActive = location === item.path;
+              const Icon = item.icon;
+              
+              return (
+                <Link key={item.path} href={item.path}>
+                  <Button
+                    variant={isActive ? 'default' : 'ghost'}
+                    className={`w-full justify-start space-x-3 text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 ${
+                      isActive ? 'bg-primary/20 border border-primary/30 text-white shadow-lg' : ''
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="sidebar-text">{item.label}</span>
+                  </Button>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </nav>
 
